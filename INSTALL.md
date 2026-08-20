@@ -56,8 +56,8 @@ Supabase (بخلاف Neon) يعطي **رابطين** يجب استخدامهما
 بعد رفع الكود على GitHub (سنقوم بذلك سويًا عند بدء التنفيذ)، لتحميله على أي جهاز:
 
 ```bash
-git clone https://github.com/USERNAME/stock-prog.git
-cd stock-prog
+git clone https://github.com/mwsfaty-afk/makhzani.git
+cd makhzani
 npm install
 ```
 
@@ -91,9 +91,11 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```bash
 npx prisma generate
 npx prisma migrate dev
+npm run db:seed
 ```
 
-الأمر الأول يجهّز "المترجم" بين الكود وقاعدة البيانات، والثاني ينشئ كل الجداول فعليًا على Neon.
+الأمر الأول يجهّز "المترجم" بين الكود وقاعدة البيانات، والثاني ينشئ كل الجداول فعليًا على Supabase،
+والثالث يملأ كتالوج الصلاحيات وخطة التجربة المجانية — بدونه لن تعمل صفحة "إنشاء حساب شركة".
 
 ---
 
