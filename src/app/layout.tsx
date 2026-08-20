@@ -1,0 +1,32 @@
+import type { Metadata } from "next";
+import { IBM_Plex_Sans_Arabic, IBM_Plex_Mono } from "next/font/google";
+import "./globals.css";
+
+const plexArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-plex-arabic",
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+export const metadata: Metadata = {
+  title: "Stock Prog",
+  description: "نظام SaaS لإدارة المخازن والمبيعات والمشتريات",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="ar"
+      dir="rtl"
+      className={`${plexArabic.variable} ${plexMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    </html>
+  );
+}
