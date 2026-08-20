@@ -15,7 +15,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Stock Prog",
+  title: "Makhzani | مخزني",
   description: "نظام SaaS لإدارة المخازن والمبيعات والمشتريات",
 };
 
