@@ -34,7 +34,9 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-const inventoryLinks = [
+type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; disabled?: boolean };
+
+const inventoryLinks: NavItem[] = [
   { href: "/dashboard/inventory/stock", label: "أرصدة المخزون", icon: ClipboardList },
   { href: "/dashboard/inventory/items", label: "الأصناف", icon: Package },
   { href: "/dashboard/inventory/categories", label: "المجموعات", icon: Tags },
@@ -43,14 +45,14 @@ const inventoryLinks = [
   { href: "/dashboard/inventory/warehouses", label: "المخازن", icon: Warehouse },
 ];
 
-const mainLinks = [
+const mainLinks: NavItem[] = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-  { href: "/dashboard/sales", label: "المبيعات", icon: ShoppingCart, disabled: true },
+  { href: "/dashboard/sales", label: "المبيعات", icon: ShoppingCart },
   { href: "/dashboard/purchases", label: "المشتريات", icon: Truck },
 ];
 
-const bottomLinks = [
-  { href: "/dashboard/customers", label: "العملاء", icon: Users, disabled: true },
+const bottomLinks: NavItem[] = [
+  { href: "/dashboard/customers", label: "العملاء", icon: Users },
   { href: "/dashboard/suppliers", label: "الموردون", icon: Building2 },
   { href: "/dashboard/cash", label: "الخزينة", icon: Wallet, disabled: true },
   { href: "/dashboard/reports", label: "التقارير", icon: BarChart3, disabled: true },

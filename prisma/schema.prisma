@@ -393,6 +393,7 @@ model Unit {
   itemsAsPurchaseUnit Item[]         @relation("ItemPurchaseUnit")
   itemsAsSalesUnit    Item[]         @relation("ItemSalesUnit")
   purchaseItems       PurchaseItem[]
+  saleItems           SaleItem[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -437,6 +438,7 @@ model Item {
   stockBalances  StockBalance[]
   stockMovements StockMovement[]
   purchaseItems  PurchaseItem[]
+  saleItems      SaleItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -695,7 +697,9 @@ model SaleItem {
   saleId          Int
   sale            Sale    @relation(fields: [saleId], references: [id])
   itemId          Int
+  item            Item    @relation(fields: [itemId], references: [id])
   unitId          Int
+  unit            Unit    @relation(fields: [unitId], references: [id])
   qty             Decimal @db.Decimal(18, 4)
   unitPrice       Decimal @db.Decimal(18, 4)
   discount        Decimal @default(0) @db.Decimal(18, 4)
