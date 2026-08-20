@@ -1,0 +1,142 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Truck,
+  Boxes,
+  Users,
+  Building2,
+  Wallet,
+  BarChart3,
+  Settings,
+  Package,
+  Tags,
+  Ruler,
+  Warehouse,
+  Award,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
+
+const inventoryLinks = [
+  { href: "/dashboard/inventory/items", label: "الأصناف", icon: Package },
+  { href: "/dashboard/inventory/categories", label: "المجموعات", icon: Tags },
+  { href: "/dashboard/inventory/brands", label: "العلامات التجارية", icon: Award },
+  { href: "/dashboard/inventory/units", label: "الوحدات", icon: Ruler },
+  { href: "/dashboard/inventory/warehouses", label: "المخازن", icon: Warehouse },
+];
+
+const mainLinks = [
+  { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
+  { href: "/dashboard/sales", label: "المبيعات", icon: ShoppingCart, disabled: true },
+  { href: "/dashboard/purchases", label: "المشتريات", icon: Truck, disabled: true },
+];
+
+const bottomLinks = [
+  { href: "/dashboard/customers", label: "العملاء", icon: Users, disabled: true },
+  { href: "/dashboard/suppliers", label: "الموردون", icon: Building2, disabled: true },
+  { href: "/dashboard/cash", label: "الخزينة", icon: Wallet, disabled: true },
+  { href: "/dashboard/reports", label: "التقارير", icon: BarChart3, disabled: true },
+  { href: "/dashboard/settings", label: "الإعدادات", icon: Settings, disabled: true },
+];
+
+export function AppSidebar({ companyName }: { companyName: string }) {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar side="right" collapsible="icon">
+      <SidebarHeader className="px-3 py-4">
+        <div className="flex items-center gap-2 px-1">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary font-mono text-sm font-bold text-sidebar-primary-foreground">
+            م
+          </div>
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">{companyName}</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-sidebar-foreground/50">
+              Makhzani
+            </p>
+          </div>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainLinks.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    render={<Link href={item.disabled ? "#" : item.href} />}
+                    isActive={pathname === item.href}
+                    disabled={item.disabled}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>المخزون</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <Boxes />
+                  <span>إدارة المخزون</span>
+                </SidebarMenuButton>
+                <SidebarMenuSub>
+                  {inventoryLinks.map((item) => (
+                    <SidebarMenuSubItem key={item.href}>
+                      <SidebarMenuSubButton render={<Link href={item.href} />} isActive={pathname.startsWith(item.href)}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {bottomLinks.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    render={<Link href={item.disabled ? "#" : item.href} />}
+                    isActive={pathname === item.href}
+                    disabled={item.disabled}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}

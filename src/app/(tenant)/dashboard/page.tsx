@@ -1,13 +1,14 @@
 import { requireTenant } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
-import { SignOutButton } from "@/components/SignOutButton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export default async function DashboardPage() {
   const { db, companyId, session } = await requireTenant();
 
   const [company, teamMembers, subscription] = await Promise.all([
     prisma.company.findUnique({ where: { id: companyId } }),
-    // db (وليس prisma الخام) — كل استعلامات User تُفلتَر تلقائيًا على companyId
     db.user.findMany({ orderBy: { createdAt: "asc" }, include: { role: true } }),
     prisma.subscription.findUnique({ where: { companyId }, include: { plan: true } }),
   ]);
@@ -17,63 +18,62 @@ export default async function DashboardPage() {
     : null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 p-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">Makhzani</p>
-          <h1 className="text-2xl font-bold">{company?.name}</h1>
-          <p className="text-sm text-neutral-500">
-            مرحبًا {session.user.name} — {session.user.roleName ?? "بدون دور"}
-          </p>
-        </div>
-        <SignOutButton />
-      </header>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold">مرحبًا {session.user.name}</h1>
+        <p className="text-sm text-muted-foreground">{company?.name}</p>
+      </div>
 
       {subscription && (
-        <section className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-          <p className="text-sm">
-            الخطة الحالية: <b>{subscription.plan.nameAr}</b> — الحالة:{" "}
-            <b>{subscription.status === "TRIALING" ? "فترة تجريبية" : subscription.status}</b>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">الاشتراك</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-3 text-sm">
+            <span>
+              الخطة: <b>{subscription.plan.nameAr}</b>
+            </span>
             {trialDaysLeft !== null && (
-              <>
-                {" "}
-                — متبقٍ <b>{trialDaysLeft}</b> يوم
-              </>
+              <Badge variant="secondary" className="font-mono tabular-nums">
+                متبقٍ {trialDaysLeft} يوم
+              </Badge>
             )}
-          </p>
-        </section>
+          </CardContent>
+        </Card>
       )}
 
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">أعضاء الفريق ({teamMembers.length})</h2>
-        <div className="overflow-x-auto rounded-lg border border-neutral-200">
-          <table className="w-full text-sm">
-            <thead className="bg-neutral-50 text-right">
-              <tr>
-                <th className="px-4 py-2 font-medium">الاسم</th>
-                <th className="px-4 py-2 font-medium">البريد الإلكتروني</th>
-                <th className="px-4 py-2 font-medium">الدور</th>
-              </tr>
-            </thead>
-            <tbody>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">أعضاء الفريق ({teamMembers.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>الاسم</TableHead>
+                <TableHead>البريد الإلكتروني</TableHead>
+                <TableHead>الدور</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {teamMembers.map((member) => (
-                <tr key={member.id} className="border-t border-neutral-200">
-                  <td className="px-4 py-2">
+                <TableRow key={member.id}>
+                  <TableCell className="font-medium">
                     {member.name}
                     {member.isOwner && (
-                      <span className="ms-2 rounded bg-neutral-900 px-1.5 py-0.5 text-xs text-white">
+                      <Badge variant="outline" className="ms-2">
                         مالك
-                      </span>
+                      </Badge>
                     )}
-                  </td>
-                  <td className="px-4 py-2 text-neutral-500">{member.email}</td>
-                  <td className="px-4 py-2">{member.role?.name ?? "—"}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{member.email}</TableCell>
+                  <TableCell>{member.role?.name ?? "—"}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,14 +1,23 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 export function SignOutButton() {
   return (
-    <button
-      onClick={() => signOut({ callbackUrl: "/login" })}
-      className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium hover:bg-neutral-100"
-    >
+    <Button variant="outline" size="sm" onClick={() => signOut({ callbackUrl: "/login" })}>
       تسجيل الخروج
-    </button>
+    </Button>
+  );
+}
+
+export function SignOutMenuItem() {
+  return (
+    <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/login" })}>
+      <LogOut />
+      تسجيل الخروج
+    </DropdownMenuItem>
   );
 }

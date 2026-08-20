@@ -389,6 +389,10 @@ model Unit {
   name      String
   nameAr    String
 
+  itemsAsBaseUnit     Item[] @relation("ItemBaseUnit")
+  itemsAsPurchaseUnit Item[] @relation("ItemPurchaseUnit")
+  itemsAsSalesUnit    Item[] @relation("ItemSalesUnit")
+
   @@unique([companyId, name])
   @@index([companyId])
 }
@@ -407,8 +411,11 @@ model Item {
   brand      Brand?    @relation(fields: [brandId], references: [id])
 
   baseUnitId         Int
+  baseUnit           Unit    @relation("ItemBaseUnit", fields: [baseUnitId], references: [id])
   purchaseUnitId     Int?
+  purchaseUnit       Unit?   @relation("ItemPurchaseUnit", fields: [purchaseUnitId], references: [id])
   salesUnitId        Int?
+  salesUnit          Unit?   @relation("ItemSalesUnit", fields: [salesUnitId], references: [id])
   purchaseUnitFactor Decimal @default(1) @db.Decimal(18, 6) // 1 كرتونة = N قطعة
   salesUnitFactor    Decimal @default(1) @db.Decimal(18, 6)
 
