@@ -17,6 +17,7 @@ import {
   Ruler,
   Warehouse,
   Award,
+  ClipboardList,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const inventoryLinks = [
+  { href: "/dashboard/inventory/stock", label: "أرصدة المخزون", icon: ClipboardList },
   { href: "/dashboard/inventory/items", label: "الأصناف", icon: Package },
   { href: "/dashboard/inventory/categories", label: "المجموعات", icon: Tags },
   { href: "/dashboard/inventory/brands", label: "العلامات التجارية", icon: Award },
