@@ -26,8 +26,8 @@ export type RecordStockMovementInput = {
   notes?: string;
   allowNegativeStock: boolean;
 } & (
-  | { qtyIn: number | string | Decimal; unitCost: number | string | Decimal; qtyOut?: never }
-  | { qtyOut: number | string | Decimal; qtyIn?: never; unitCost?: never }
+  | { qtyIn: number | string | Decimal; unitCost: number | string | Decimal; qtyOut?: never; reverseUnitCost?: never }
+  | { qtyOut: number | string | Decimal; qtyIn?: never; unitCost?: never; reverseUnitCost?: number | string | Decimal }
 );
 
 /**
@@ -72,8 +72,18 @@ export async function recordStockMovement(tx: Tx, input: RecordStockMovementInpu
     if (!input.allowNegativeStock && newQty.isNegative()) {
       throw new InsufficientStockError(existingQty, qtyOut);
     }
-    newAvgCost = existingAvgCost;
-    movementUnitCost = existingAvgCost;
+    if (input.reverseUnitCost !== undefined) {
+      // إلغاء حركة IN سابقة (مثل إلغاء فاتورة شراء) ليس بيعًا عاديًا — لازم "فك" أثرها على
+      // المتوسط المرجّح جبريًا، وإلا يبقى المتوسط ملوّثًا بتكلفة فاتورة أُلغيت بالكامل.
+      const reverseCost = new D(input.reverseUnitCost);
+      const oldValue = existingQty.times(existingAvgCost);
+      const removedValue = qtyOut.times(reverseCost);
+      newAvgCost = newQty.isZero() ? new D(0) : oldValue.minus(removedValue).div(newQty);
+      movementUnitCost = reverseCost;
+    } else {
+      newAvgCost = existingAvgCost;
+      movementUnitCost = existingAvgCost;
+    }
   }
 
   const totalCost = qtyIn.greaterThan(0) ? qtyIn.times(movementUnitCost) : qtyOut.times(movementUnitCost);

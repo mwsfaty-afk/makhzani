@@ -389,9 +389,10 @@ model Unit {
   name      String
   nameAr    String
 
-  itemsAsBaseUnit     Item[] @relation("ItemBaseUnit")
-  itemsAsPurchaseUnit Item[] @relation("ItemPurchaseUnit")
-  itemsAsSalesUnit    Item[] @relation("ItemSalesUnit")
+  itemsAsBaseUnit     Item[]         @relation("ItemBaseUnit")
+  itemsAsPurchaseUnit Item[]         @relation("ItemPurchaseUnit")
+  itemsAsSalesUnit    Item[]         @relation("ItemSalesUnit")
+  purchaseItems       PurchaseItem[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -435,6 +436,7 @@ model Item {
 
   stockBalances  StockBalance[]
   stockMovements StockMovement[]
+  purchaseItems  PurchaseItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -578,7 +580,9 @@ model PurchaseItem {
   purchaseId      Int
   purchase        Purchase @relation(fields: [purchaseId], references: [id])
   itemId          Int
+  item            Item     @relation(fields: [itemId], references: [id])
   unitId          Int
+  unit            Unit     @relation(fields: [unitId], references: [id])
   qty             Decimal  @db.Decimal(18, 4)
   bonusQty        Decimal  @default(0) @db.Decimal(18, 4)
   unitPrice       Decimal  @db.Decimal(18, 4)
