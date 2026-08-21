@@ -336,6 +336,7 @@ model Warehouse {
   stockAdjustments StockAdjustment[]
   transfersOut     StockTransfer[]     @relation("TransferFrom")
   transfersIn      StockTransfer[]     @relation("TransferTo")
+  stockTakes       StockTake[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -444,6 +445,7 @@ model Item {
   purchaseReturnItems PurchaseReturnItem[]
   saleReturnItems     SaleReturnItem[]
   stockTransferItems  StockTransferItem[]
+  stockTakeItems      StockTakeItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -879,6 +881,7 @@ model StockTake {
   docNo       String
   date        DateTime
   warehouseId Int
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
   scope       String // "full" | "category" | "items"
   status      DocStatus @default(DRAFT)
   userId      Int
@@ -896,6 +899,7 @@ model StockTakeItem {
   stockTakeId Int
   stockTake   StockTake @relation(fields: [stockTakeId], references: [id])
   itemId      Int
+  item        Item      @relation(fields: [itemId], references: [id])
   bookQty     Decimal   @db.Decimal(18, 4)
   actualQty   Decimal   @db.Decimal(18, 4)
   unitCost    Decimal   @db.Decimal(18, 6)
