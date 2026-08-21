@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { recordStockMovement } from "@/lib/services/inventory/stockMovement";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 const D = Prisma.Decimal;
 
@@ -16,6 +17,7 @@ export async function postStockTake(
   userId: number,
   counts: { stockTakeItemId: number; actualQty: number }[],
 ) {
+  await assertSubscriptionActive(companyId);
   return prisma.$transaction(
     async (tx) => {
       const stockTake = await tx.stockTake.findFirst({

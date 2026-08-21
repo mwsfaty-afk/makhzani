@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 const D = Prisma.Decimal;
 
@@ -14,6 +15,7 @@ export async function collectFromCustomer(input: {
   amount: number;
   notes?: string;
 }) {
+  await assertSubscriptionActive(input.companyId);
   if (input.amount <= 0) throw new Error("المبلغ يجب أن يكون أكبر من صفر");
 
   return prisma.$transaction(async (tx) => {

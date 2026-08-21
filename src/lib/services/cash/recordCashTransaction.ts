@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 /**
  * قبض أو صرف نقدي مستقل (بند 32) — غير مرتبط بعميل أو مورد أو فاتورة (مثل مصروفات
@@ -12,6 +13,7 @@ export async function recordCashTransaction(input: {
   amount: number;
   notes?: string;
 }) {
+  await assertSubscriptionActive(input.companyId);
   if (input.amount <= 0) throw new Error("المبلغ يجب أن يكون أكبر من صفر");
 
   return prisma.$transaction(async (tx) => {

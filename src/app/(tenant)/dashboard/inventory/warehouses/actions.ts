@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
+import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
 
 const schema = z.object({
   code: z.string().min(1, "كود المخزن مطلوب"),
@@ -27,7 +29,8 @@ export async function createWarehouse(formData: FormData) {
     // companyId يُحقَن تلقائيًا داخل tenantPrisma() وقت التشغيل
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await db.warehouse.create({ data: parsed.data as any });
-  } catch {
+  } catch (err) {
+    if (err instanceof SubscriptionExpiredError || err instanceof PlanLimitExceededError) return { error: err.message };
     return { error: "كود المخزن مستخدم بالفعل" };
   }
   revalidatePath("/dashboard/inventory/warehouses");

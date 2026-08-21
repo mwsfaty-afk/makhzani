@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { recordStockMovement } from "@/lib/services/inventory/stockMovement";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 const D = Prisma.Decimal;
 
@@ -10,6 +11,7 @@ const D = Prisma.Decimal;
  * وقيد خزينة إن وُجد سداد وقت الشراء. لا تعديل جزئي ممكن.
  */
 export async function postPurchase(companyId: number, purchaseId: number, userId: number) {
+  await assertSubscriptionActive(companyId);
   return prisma.$transaction(
     async (tx) => {
       const purchase = await tx.purchase.findFirst({

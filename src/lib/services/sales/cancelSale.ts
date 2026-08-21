@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { recordStockMovement } from "@/lib/services/inventory/stockMovement";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 const D = Prisma.Decimal;
 
@@ -10,6 +11,7 @@ const D = Prisma.Decimal;
  * خرجت بها لا يغيّر المتوسط المرجّح رياضيًا (بخلاف عكس فاتورة شراء الذي يحتاج معادلة خاصة).
  */
 export async function cancelSale(companyId: number, saleId: number, userId: number) {
+  await assertSubscriptionActive(companyId);
   return prisma.$transaction(
     async (tx) => {
       const sale = await tx.sale.findFirst({

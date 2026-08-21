@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { recordStockMovement } from "@/lib/services/inventory/stockMovement";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 const D = Prisma.Decimal;
 
@@ -21,6 +22,7 @@ export async function createPurchaseReturn(input: {
   reason?: string;
   lines: CreatePurchaseReturnLine[];
 }) {
+  await assertSubscriptionActive(input.companyId);
   return prisma.$transaction(
     async (tx) => {
       const purchase = await tx.purchase.findFirst({

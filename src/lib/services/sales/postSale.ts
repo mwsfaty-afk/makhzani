@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { recordStockMovement, InsufficientStockError } from "@/lib/services/inventory/stockMovement";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 const D = Prisma.Decimal;
 
@@ -11,6 +12,7 @@ const D = Prisma.Decimal;
  * الربح يُحسب هنا فقط (وليس عند الإنشاء) لأنه يعتمد على التكلفة اللحظية وقت الاعتماد الفعلي.
  */
 export async function postSale(companyId: number, saleId: number, userId: number) {
+  await assertSubscriptionActive(companyId);
   return prisma.$transaction(
     async (tx) => {
       const sale = await tx.sale.findFirst({

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
 import { collectFromCustomer } from "@/lib/services/customers/collectFromCustomer";
+import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
+import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
 
 const schema = z.object({
   code: z.string().min(1, "كود العميل مطلوب"),
@@ -23,7 +25,8 @@ export async function createCustomer(formData: FormData) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await db.customer.create({ data: parsed.data as any });
-  } catch {
+  } catch (err) {
+    if (err instanceof SubscriptionExpiredError || err instanceof PlanLimitExceededError) return { error: err.message };
     return { error: "كود العميل مستخدم بالفعل" };
   }
   revalidatePath("/dashboard/customers");

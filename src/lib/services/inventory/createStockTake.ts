@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/db/prisma";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 /**
  * تجهيز جرد كامل لمخزن (بند 29): يلتقط الرصيد الدفتري الحالي لكل صنف له رصيد في هذا
  * المخزن كنقطة بداية — لا يؤثر على شيء بعد (مسودة). العد الفعلي يُدخَل لاحقًا ثم يُعتمد.
  */
 export async function createStockTake(input: { companyId: number; userId: number; warehouseId: number }) {
+  await assertSubscriptionActive(input.companyId);
   const balances = await prisma.stockBalance.findMany({
     where: { companyId: input.companyId, warehouseId: input.warehouseId },
     include: { item: true },

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { requireTenant } from "@/lib/auth/session";
 import { recordStockMovement, InsufficientStockError } from "@/lib/services/inventory/stockMovement";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
+import { assertSubscriptionActive, SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
 
 const IN_REASONS = ["opening", "adjustment", "gift", "production", "other"] as const;
 const OUT_REASONS = ["damage", "consumption", "sample", "production", "other"] as const;
@@ -43,6 +44,7 @@ export async function adjustStock(formData: FormData) {
   const movementType = d.direction === "IN" ? (d.reason === "opening" ? "OPENING_BALANCE" : "STOCK_ADJUSTMENT_IN") : d.reason === "damage" ? "DAMAGE" : "STOCK_ADJUSTMENT_OUT";
 
   try {
+    await assertSubscriptionActive(companyId);
     await prisma.$transaction(async (tx) => {
       const docNo = await nextDocumentNumber(tx, companyId, docType);
       const now = new Date();
@@ -98,7 +100,7 @@ export async function adjustStock(formData: FormData) {
       });
     }, { timeout: 15000 });
   } catch (err) {
-    if (err instanceof InsufficientStockError) return { error: err.message };
+    if (err instanceof InsufficientStockError || err instanceof SubscriptionExpiredError) return { error: err.message };
     return { error: "حدث خطأ أثناء حفظ الحركة" };
   }
 

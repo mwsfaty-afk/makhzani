@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 /**
  * تحويل مبلغ بين خزينتين (مثل: من الخزينة النقدية إلى حساب بنكي) — بند 32.
@@ -12,6 +13,7 @@ export async function transferBetweenCashBoxes(input: {
   amount: number;
   notes?: string;
 }) {
+  await assertSubscriptionActive(input.companyId);
   if (input.fromCashBoxId === input.toCashBoxId) {
     throw new Error("لا يمكن التحويل من وإلى نفس الخزينة");
   }

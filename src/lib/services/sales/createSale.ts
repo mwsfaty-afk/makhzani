@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
+import { enforceMonthlyDocumentLimit } from "@/lib/services/billing/enforceLimit";
 
 const D = Prisma.Decimal;
 
@@ -31,6 +33,8 @@ export type CreateSaleInput = {
  * الفعلي (قد يتغير بين إنشاء المسودة واعتمادها) — تُحسب وتُملأ داخل postSale().
  */
 export async function createSale(input: CreateSaleInput) {
+  await assertSubscriptionActive(input.companyId);
+  await enforceMonthlyDocumentLimit(input.companyId);
   if (input.lines.length === 0) throw new Error("يجب إضافة صنف واحد على الأقل");
 
   const items = await prisma.item.findMany({

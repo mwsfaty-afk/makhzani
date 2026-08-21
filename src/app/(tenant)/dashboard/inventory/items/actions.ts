@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
+import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
 
 const optionalNumber = z
   .string()
@@ -64,7 +66,8 @@ export async function createItem(formData: FormData) {
         reorderPoint: d.reorderPoint ?? 0,
       } as any,
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof SubscriptionExpiredError || err instanceof PlanLimitExceededError) return { error: err.message };
     return { error: "كود الصنف مستخدم بالفعل" };
   }
 

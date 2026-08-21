@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { recordStockMovement } from "@/lib/services/inventory/stockMovement";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
+import { assertSubscriptionActive } from "@/lib/services/billing/subscriptionGuard";
 
 export type CreateStockTransferLine = { itemId: number; qty: number };
 
@@ -18,6 +19,7 @@ export async function createStockTransfer(input: {
   notes?: string;
   lines: CreateStockTransferLine[];
 }) {
+  await assertSubscriptionActive(input.companyId);
   if (input.fromWarehouseId === input.toWarehouseId) {
     throw new Error("لا يمكن التحويل من وإلى نفس المخزن");
   }
