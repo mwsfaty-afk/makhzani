@@ -66,7 +66,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
 
   const pricedPlans = await Promise.all(plans.map(async (plan) => ({ plan, price: await getPlanPriceForCompany(plan, company) })));
 
-  const daysLeft = Math.max(0, Math.ceil((subscription.currentPeriodEnd.getTime() - Date.now()) / 86400000));
+  const daysLeft = Math.max(0, Math.ceil((subscription.currentPeriodEnd.getTime() - new Date().getTime()) / 86400000));
   const gatewayCodes = listAvailableGatewayCodes();
   const statusInfo = STATUS_LABELS[subscription.status];
 

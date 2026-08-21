@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
 
 const schema = z.object({
   name: z.string().min(1, "الاسم مطلوب (بالإنجليزية)"),
@@ -10,7 +11,10 @@ const schema = z.object({
 });
 
 export async function createUnit(formData: FormData) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "units.create");
+  if (denied) return denied;
+  const { db } = ctx;
   const parsed = schema.safeParse({
     name: formData.get("name"),
     nameAr: formData.get("nameAr"),
@@ -30,7 +34,10 @@ export async function createUnit(formData: FormData) {
 }
 
 export async function deleteUnit(id: number) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "units.delete");
+  if (denied) return denied;
+  const { db } = ctx;
   try {
     await db.unit.delete({ where: { id } });
   } catch {

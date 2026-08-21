@@ -1,0 +1,32 @@
+name: Database Backup
+
+# نسخة احتياطية يومية لقاعدة بيانات Supabase — Supabase Free Tier لا يوفر نسخًا احتياطية
+# تلقائية (متاحة فقط من خطة Pro فصاعدًا)، فهذا Workflow هو آلية النسخ الاحتياطي الفعلية
+# لهذا المشروع إلى أن يُرقّى الحساب. يرفع كل نسخة كـ Artifact محتفَظ به 30 يومًا.
+#
+# يتطلب سرًّا واحدًا في إعدادات المستودع (Settings → Secrets and variables → Actions):
+#   DIRECT_URL — نفس قيمة DIRECT_URL في .env (اتصال Postgres المباشر، المنفذ 5432)
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # يوميًا 3:00 صباحًا UTC
+  workflow_dispatch: {} # تشغيل يدوي عند الحاجة
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump database
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: |
+          TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+          pg_dump "$DIRECT_URL" --format=custom --no-owner --no-privileges --file="makhzani_${TIMESTAMP}.dump"
+          echo "DUMP_FILE=makhzani_${TIMESTAMP}.dump" >> "$GITHUB_ENV"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.DUMP_FILE }}
+          path: ${{ env.DUMP_FILE }}
+          retention-days: 30

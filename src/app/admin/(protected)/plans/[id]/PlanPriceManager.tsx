@@ -32,7 +32,11 @@ export function PlanPriceManager({ planId, prices }: { planId: number; prices: S
 
   function handleDelete(planPriceId: number) {
     startTransition(async () => {
-      await deletePlanPriceAction(planId, planPriceId);
+      const res = await deletePlanPriceAction(planId, planPriceId);
+      if (res?.error) {
+        toast.error(res.error);
+        return;
+      }
       toast.success("تم حذف السعر");
     });
   }

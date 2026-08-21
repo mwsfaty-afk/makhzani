@@ -377,6 +377,20 @@ Vercel Cron يومي (`/api/cron/check-subscriptions`) يفحص كل الاشت�
 **قاعدة ذهبية:** أي فحص صلاحية أو Business Rule يظهر في الواجهة **يجب** أن يتكرر في الـ Backend.
 الواجهة تجميل فقط.
 
+### 9.1 حالة التنفيذ الفعلية (بعد تدقيق Phase 16)
+
+| البند أعلاه | الحالة |
+|---|---|
+| SQL Injection | ✅ منفَّذ — Prisma فقط، الاستثناء الوحيد (`stockMovement.ts`'s `$queryRaw` لقفل الصف) يستخدم `Prisma.sql` المُعامَل، لا تسلسل نصي |
+| كشف بيانات شركة أخرى | ✅ منفَّذ ومُختبَر آليًا (`tests/tenantIsolation.test.ts`) |
+| تصعيد صلاحيات | ✅ **أُصلح في Phase 16** — كان الكتالوج/الأدوار مبنيَّين منذ Phase 1 لكن غير مفروضين فعليًا في أي Server Action؛ الآن `checkPermission()` مفروض في كل الأكشنز الحساسة (`tests/rbac.test.ts`) |
+| Rate Limiting | ✅ **أُضيف في Phase 16** — جدول `LoginAttempt` (DB-backed، يعمل عبر نسخ Vercel Serverless)، يمنع تسجيل الدخول (شركات وأدمن) بعد 5 محاولات فاشلة خلال 15 دقيقة |
+| النسخ الاحتياطي | ⚠️ Supabase (وليس Neon كما في المسودة الأصلية) — راجع `docs/BACKUP_AND_RECOVERY.md`، Free Tier لا يوفر نسخًا تلقائية، فأُضيف GitHub Action يومي بديل |
+| Audit Log | ✅ موسَّع في Phase 16 ليشمل إجراءات أدمن المنصة أيضًا (`PlatformAuditLog`) بجانب `AuditLog` الخاص بالشركات |
+| CSRF | ✅ Server Actions محمية تلقائيًا من Next.js (فحص Origin)؛ NextAuth CSRF Token لمسار Credentials |
+
+راجع تقرير التدقيق الكامل (الأمان، الاختبارات، الأداء، النسخ الاحتياطي) في ملخص Phase 16.
+
 ---
 
 ## 10. هيكل الـ API (لدعم تطبيقات مستقبلية / Mobile / تكاملات) — بند 62

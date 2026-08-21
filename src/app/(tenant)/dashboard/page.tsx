@@ -21,8 +21,9 @@ export default async function DashboardPage() {
     getDashboardData(companyId),
   ]);
 
+  const now = new Date();
   const trialDaysLeft = subscription?.trialEnd
-    ? Math.max(0, Math.ceil((subscription.trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    ? Math.max(0, Math.ceil((subscription.trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     : null;
 
   const monthChangePercent =

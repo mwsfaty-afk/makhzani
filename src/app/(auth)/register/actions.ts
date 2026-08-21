@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { registerCompany } from "@/lib/services/billing/registerCompany";
+import { toUserErrorMessage } from "@/lib/errors";
 
 const schema = z.object({
   companyName: z.string().min(2, "اسم الشركة قصير جدًا"),
@@ -36,6 +37,6 @@ export async function registerCompanyAction(
     await registerCompany(parsed.data);
     return { success: true };
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ غير متوقع" };
+    return { error: toUserErrorMessage(err) };
   }
 }

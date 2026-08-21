@@ -24,8 +24,12 @@ export async function activateSubscriptionFromPayment(
     const currentPeriodEnd =
       payment.plan.durationDays > 0 ? new Date(now.getTime() + payment.plan.durationDays * 24 * 60 * 60 * 1000) : now;
 
-    await tx.payment.update({
-      where: { id: paymentId },
+    // تحديث شرطي ذرّي (WHERE status = PENDING) — يمنع اعتماد نفس الدفعة مرتين في حال
+    // سباق متزامن (مثلًا نقرتان على "اعتماد" في نفس اللحظة، أو تكرار طلب Webhook): لو حدّثت
+    // معاملة أخرى نفس الصف بين القراءة أعلاه وهذا السطر، count يكون صفرًا هنا فنرفض بوضوح
+    // بدل تفعيل الاشتراك مرتين أو الكتابة فوق قيم بعضهما البعض.
+    const updateResult = await tx.payment.updateMany({
+      where: { id: paymentId, status: "PENDING" },
       data: {
         status: "PAID",
         paidAt: now,
@@ -34,6 +38,7 @@ export async function activateSubscriptionFromPayment(
         reviewedAt: opts.reviewedByAdminId ? now : undefined,
       },
     });
+    if (updateResult.count === 0) throw new PaymentAlreadyProcessedError();
 
     const subscription = await tx.subscription.update({
       where: { id: payment.subscriptionId },
@@ -51,10 +56,12 @@ export async function activateSubscriptionFromPayment(
   });
 }
 
-/** رفض دفعة يدوية معلَّقة — لا يُغيّر الاشتراك، فقط يُسجّل السبب ومَن راجعها. */
+/** رفض دفعة يدوية معلَّقة — لا يُغيّر الاشتراك، فقط يُسجّل السبب ومَن راجعها. تحديث شرطي
+ * (WHERE status = PENDING) لنفس سبب activateSubscriptionFromPayment: يمنع رفض دفعة تم
+ * اعتمادها بالفعل (سباق بين تبويبي أدمن، أو نقرتين متتاليتين) والكتابة فوق حالتها الصحيحة. */
 export async function rejectManualPayment(paymentId: number, adminId: number, reason: string) {
-  return prisma.payment.update({
-    where: { id: paymentId },
+  const result = await prisma.payment.updateMany({
+    where: { id: paymentId, status: "PENDING" },
     data: {
       status: "FAILED",
       rejectionReason: reason,
@@ -62,4 +69,6 @@ export async function rejectManualPayment(paymentId: number, adminId: number, re
       reviewedAt: new Date(),
     },
   });
+  if (result.count === 0) throw new PaymentAlreadyProcessedError();
+  return prisma.payment.findUniqueOrThrow({ where: { id: paymentId } });
 }

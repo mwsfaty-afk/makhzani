@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
+import { toUserErrorMessage } from "@/lib/errors";
 import { startCheckout } from "@/lib/services/billing/startCheckout";
 import { attachManualPaymentProof, InvalidProofFileError } from "@/lib/services/billing/submitManualProof";
 
@@ -10,7 +12,12 @@ function baseUrl() {
 }
 
 export async function startCheckoutAction(planId: number, gatewayCode: string) {
-  const { companyId } = await requireTenant();
+  const ctx = await requireTenant();
+  // إدارة الاشتراك/الفوترة تبقى محصورة على Owner/Admin (وحدهما يملكان صلاحيات settings.* في
+  // الأدوار الافتراضية) — لا يستطيع دور Cashier أو Viewer مثلًا تغيير خطة الشركة أو دفع فاتورة.
+  const denied = await checkPermission(ctx, "settings.edit");
+  if (denied) return denied;
+  const { companyId } = ctx;
 
   const isPaypal = gatewayCode === "paypal";
   const returnUrl = isPaypal ? `${baseUrl()}/api/billing/paypal/return` : `${baseUrl()}/dashboard/billing`;
@@ -20,7 +27,7 @@ export async function startCheckoutAction(planId: number, gatewayCode: string) {
   try {
     outcome = await startCheckout({ companyId, planId, gatewayCode, returnUrl, cancelUrl });
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "تعذّر بدء عملية الدفع" };
+    return { error: toUserErrorMessage(err, "تعذّر بدء عملية الدفع") };
   }
 
   if (outcome.result.kind === "redirect") {
@@ -32,7 +39,10 @@ export async function startCheckoutAction(planId: number, gatewayCode: string) {
 }
 
 export async function submitManualProofAction(paymentId: number, formData: FormData) {
-  const { companyId } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "settings.edit");
+  if (denied) return denied;
+  const { companyId } = ctx;
 
   const referenceNumber = String(formData.get("referenceNumber") ?? "");
   const file = formData.get("proof") as File | null;
@@ -51,7 +61,7 @@ export async function submitManualProofAction(paymentId: number, formData: FormD
     });
   } catch (err) {
     if (err instanceof InvalidProofFileError) return { error: err.message };
-    return { error: err instanceof Error ? err.message : "تعذّر حفظ إثبات الدفع" };
+    return { error: toUserErrorMessage(err, "تعذّر حفظ إثبات الدفع") };
   }
 
   redirect("/dashboard/billing?submitted=1");

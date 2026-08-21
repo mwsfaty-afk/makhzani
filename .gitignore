@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# local database backup dumps (never commit real data)
+/backups
+
 # next.js
 /.next/
 /out/

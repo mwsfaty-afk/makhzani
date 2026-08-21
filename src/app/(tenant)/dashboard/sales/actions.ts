@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
+import { toUserErrorMessage } from "@/lib/errors";
 import { createSale, type CreateSaleLine } from "@/lib/services/sales/createSale";
 import { postSale } from "@/lib/services/sales/postSale";
 import { cancelSale } from "@/lib/services/sales/cancelSale";
@@ -28,7 +30,10 @@ const schema = z.object({
 });
 
 export async function createSaleAction(formData: FormData) {
-  const { companyId, userId } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "sales.create");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
 
   const parsed = schema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -55,19 +60,22 @@ export async function createSaleAction(formData: FormData) {
     });
     saleId = sale.id;
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء حفظ الفاتورة" };
+    return { error: toUserErrorMessage(err, "حدث خطأ أثناء حفظ الفاتورة") };
   }
 
   revalidatePath("/dashboard/sales");
   redirect(`/dashboard/sales/${saleId}`);
 }
 
-export async function postSaleAction(saleId: number) {
-  const { companyId, userId } = await requireTenant();
+export async function postSaleAction(saleId: number): Promise<{ error?: string; success?: boolean }> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "sales.approve");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
   try {
     await postSale(companyId, saleId, userId);
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء اعتماد الفاتورة" };
+    return { error: toUserErrorMessage(err, "حدث خطأ أثناء اعتماد الفاتورة") };
   }
   revalidatePath(`/dashboard/sales/${saleId}`);
   revalidatePath("/dashboard/sales");
@@ -75,12 +83,15 @@ export async function postSaleAction(saleId: number) {
   return { success: true };
 }
 
-export async function cancelSaleAction(saleId: number) {
-  const { companyId, userId } = await requireTenant();
+export async function cancelSaleAction(saleId: number): Promise<{ error?: string; success?: boolean }> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "sales.cancel");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
   try {
     await cancelSale(companyId, saleId, userId);
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء إلغاء الفاتورة" };
+    return { error: toUserErrorMessage(err, "حدث خطأ أثناء إلغاء الفاتورة") };
   }
   revalidatePath(`/dashboard/sales/${saleId}`);
   revalidatePath("/dashboard/sales");

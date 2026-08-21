@@ -2,9 +2,11 @@ import { prisma } from "@/lib/db/prisma";
 
 export class PermissionDeniedError extends Error {
   constructor(code: string) {
-    super(`Permission denied: ${code}`);
+    super("ليس لديك صلاحية لتنفيذ هذا الإجراء");
     this.name = "PermissionDeniedError";
+    this.code = code;
   }
+  code: string;
 }
 
 /**
@@ -41,4 +43,17 @@ export async function requirePermission(params: {
 }) {
   const allowed = await hasPermission(params);
   if (!allowed) throw new PermissionDeniedError(params.code);
+}
+
+/**
+ * الصيغة المناسبة لبداية أي Server Action: تُعيد `{ error }` بدل رمي استثناء، لتتوافق مع
+ * نمط `if (!parsed.success) return { error }` المستخدم بالفعل في كل الأكشنز — يكفي سطر
+ * واحد إضافي بعد `requireTenant()` بدل try/catch جديد حول كل دالة.
+ */
+export async function checkPermission(
+  ctx: { userId: number; roleId: number | null; isOwner: boolean },
+  code: string,
+): Promise<{ error: string } | null> {
+  const allowed = await hasPermission({ ...ctx, code });
+  return allowed ? null : { error: "ليس لديك صلاحية لتنفيذ هذا الإجراء" };
 }

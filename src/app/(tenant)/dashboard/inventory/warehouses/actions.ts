@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
 import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
 import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
 
@@ -15,7 +16,10 @@ const schema = z.object({
 });
 
 export async function createWarehouse(formData: FormData) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "warehouses.create");
+  if (denied) return denied;
+  const { db } = ctx;
   const parsed = schema.safeParse({
     code: formData.get("code"),
     name: formData.get("name"),
@@ -38,7 +42,10 @@ export async function createWarehouse(formData: FormData) {
 }
 
 export async function deleteWarehouse(id: number) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "warehouses.delete");
+  if (denied) return denied;
+  const { db } = ctx;
   const warehouse = await db.warehouse.findUnique({ where: { id } });
   if (warehouse?.isDefault) {
     return { error: "لا يمكن حذف المخزن الافتراضي" };

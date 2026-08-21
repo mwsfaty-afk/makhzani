@@ -171,6 +171,11 @@ async function main() {
     },
   });
   console.log(`Platform admin seeded: ${adminEmail}`);
+  console.log(
+    "\n⚠️  SECURITY: this account uses a well-known development password (Admin123!).\n" +
+      "   Before going to production, run:\n" +
+      "   npx tsx scripts/change-admin-password.ts admin@makhzani.app '<a strong password>'\n",
+  );
 }
 
 main()

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
 import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
 import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
 
@@ -33,7 +34,10 @@ const schema = z.object({
 });
 
 export async function createItem(formData: FormData) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "items.create");
+  if (denied) return denied;
+  const { db } = ctx;
 
   const raw = Object.fromEntries(formData.entries());
   const parsed = schema.safeParse(raw);
@@ -44,7 +48,6 @@ export async function createItem(formData: FormData) {
 
   try {
     // companyId يُحقَن تلقائيًا داخل tenantPrisma() وقت التشغيل
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await db.item.create({
       data: {
         code: d.code,
@@ -64,6 +67,7 @@ export async function createItem(formData: FormData) {
         minStock: d.minStock ?? 0,
         maxStock: d.maxStock ?? 0,
         reorderPoint: d.reorderPoint ?? 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     });
   } catch (err) {
@@ -76,7 +80,10 @@ export async function createItem(formData: FormData) {
 }
 
 export async function deleteItem(id: number) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "items.delete");
+  if (denied) return denied;
+  const { db } = ctx;
   try {
     await db.item.delete({ where: { id } });
   } catch {

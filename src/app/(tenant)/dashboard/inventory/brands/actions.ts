@@ -3,11 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
 
 const schema = z.object({ name: z.string().min(1, "اسم العلامة التجارية مطلوب") });
 
 export async function createBrand(formData: FormData) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "brands.create");
+  if (denied) return denied;
+  const { db } = ctx;
   const parsed = schema.safeParse({ name: formData.get("name") });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -19,7 +23,10 @@ export async function createBrand(formData: FormData) {
 }
 
 export async function deleteBrand(id: number) {
-  const { db } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "brands.delete");
+  if (denied) return denied;
+  const { db } = ctx;
   try {
     await db.brand.delete({ where: { id } });
   } catch {

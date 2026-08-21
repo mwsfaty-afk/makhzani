@@ -8,6 +8,7 @@ import type { PaymentGateway, CheckoutContext, CheckoutResult } from "./types";
  */
 export const paytabsGateway: PaymentGateway = {
   code: "paytabs",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- ctx غير مستخدم هنا لكن الواجهة PaymentGateway تتطلبه
   async createCheckout(_ctx: CheckoutContext): Promise<CheckoutResult> {
     throw new Error("بوابة PayTabs لم تُفعَّل بعد على هذه المنصة — جرّب طريقة دفع أخرى حاليًا.");
   },

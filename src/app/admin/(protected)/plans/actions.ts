@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requirePlatformAdmin } from "@/lib/auth/adminSession";
 import { prisma } from "@/lib/db/prisma";
+import { logAdminAction } from "@/lib/services/admin/auditLog";
 
 const planSchema = z.object({
   nameAr: z.string().min(1),
@@ -24,11 +25,13 @@ const planSchema = z.object({
 });
 
 export async function updatePlanAction(planId: number, formData: FormData) {
-  await requirePlatformAdmin();
+  const admin = await requirePlatformAdmin();
 
   const parsed = planSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const d = parsed.data;
+
+  await logAdminAction({ adminId: admin.id, action: "plan.update", targetType: "plan", targetId: planId, details: d });
 
   await prisma.plan.update({
     where: { id: planId },
@@ -63,7 +66,7 @@ const planPriceSchema = z.object({
 });
 
 export async function upsertPlanPriceAction(planId: number, formData: FormData) {
-  await requirePlatformAdmin();
+  const admin = await requirePlatformAdmin();
 
   const parsed = planPriceSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -75,13 +78,20 @@ export async function upsertPlanPriceAction(planId: number, formData: FormData) 
     create: { planId, countryCode: d.countryCode.toUpperCase(), currency: d.currency.toUpperCase(), price: d.price },
   });
 
+  await logAdminAction({ adminId: admin.id, action: "planPrice.upsert", targetType: "plan", targetId: planId, details: d });
+
   revalidatePath(`/admin/plans/${planId}`);
   return { success: true };
 }
 
 export async function deletePlanPriceAction(planId: number, planPriceId: number) {
-  await requirePlatformAdmin();
+  const admin = await requirePlatformAdmin();
+  // نتحقق أن السعر فعلًا تابع لهذه الخطة قبل الحذف — منع حذف عابر لخطة أخرى بمعرّف غير متطابق
+  const price = await prisma.planPrice.findFirst({ where: { id: planPriceId, planId } });
+  if (!price) return { error: "السعر غير موجود لهذه الخطة" };
+
   await prisma.planPrice.delete({ where: { id: planPriceId } });
+  await logAdminAction({ adminId: admin.id, action: "planPrice.delete", targetType: "plan", targetId: planId, details: { planPriceId } });
   revalidatePath(`/admin/plans/${planId}`);
   return { success: true };
 }

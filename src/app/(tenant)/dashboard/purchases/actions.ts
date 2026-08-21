@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
+import { toUserErrorMessage } from "@/lib/errors";
 import { createPurchase, type CreatePurchaseLine } from "@/lib/services/purchases/createPurchase";
 import { postPurchase } from "@/lib/services/purchases/postPurchase";
 import { cancelPurchase } from "@/lib/services/purchases/cancelPurchase";
@@ -28,7 +30,10 @@ const schema = z.object({
 });
 
 export async function createPurchaseAction(formData: FormData) {
-  const { companyId, userId } = await requireTenant();
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "purchases.create");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
 
   const parsed = schema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -55,19 +60,22 @@ export async function createPurchaseAction(formData: FormData) {
     });
     purchaseId = purchase.id;
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء حفظ الفاتورة" };
+    return { error: toUserErrorMessage(err, "حدث خطأ أثناء حفظ الفاتورة") };
   }
 
   revalidatePath("/dashboard/purchases");
   redirect(`/dashboard/purchases/${purchaseId}`);
 }
 
-export async function postPurchaseAction(purchaseId: number) {
-  const { companyId, userId } = await requireTenant();
+export async function postPurchaseAction(purchaseId: number): Promise<{ error?: string; success?: boolean }> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "purchases.approve");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
   try {
     await postPurchase(companyId, purchaseId, userId);
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء اعتماد الفاتورة" };
+    return { error: toUserErrorMessage(err, "حدث خطأ أثناء اعتماد الفاتورة") };
   }
   revalidatePath(`/dashboard/purchases/${purchaseId}`);
   revalidatePath("/dashboard/purchases");
@@ -75,12 +83,15 @@ export async function postPurchaseAction(purchaseId: number) {
   return { success: true };
 }
 
-export async function cancelPurchaseAction(purchaseId: number) {
-  const { companyId, userId } = await requireTenant();
+export async function cancelPurchaseAction(purchaseId: number): Promise<{ error?: string; success?: boolean }> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "purchases.cancel");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
   try {
     await cancelPurchase(companyId, purchaseId, userId);
   } catch (err) {
-    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء إلغاء الفاتورة" };
+    return { error: toUserErrorMessage(err, "حدث خطأ أثناء إلغاء الفاتورة") };
   }
   revalidatePath(`/dashboard/purchases/${purchaseId}`);
   revalidatePath("/dashboard/purchases");

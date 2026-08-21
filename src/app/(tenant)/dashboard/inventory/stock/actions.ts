@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { requireTenant } from "@/lib/auth/session";
+import { checkPermission } from "@/lib/auth/permissions";
 import { recordStockMovement, InsufficientStockError } from "@/lib/services/inventory/stockMovement";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
 import { assertSubscriptionActive, SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
@@ -21,8 +22,11 @@ const schema = z.object({
   notes: z.string().optional(),
 });
 
-export async function adjustStock(formData: FormData) {
-  const { companyId, userId } = await requireTenant();
+export async function adjustStock(formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "stock_adjustments.create");
+  if (denied) return denied;
+  const { companyId, userId } = ctx;
 
   const raw = Object.fromEntries(formData.entries());
   const parsed = schema.safeParse(raw);

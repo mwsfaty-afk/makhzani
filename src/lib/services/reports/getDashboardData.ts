@@ -90,29 +90,42 @@ export async function getDashboardData(companyId: number) {
 
   const inventoryValue = stockBalances.reduce((sum, b) => sum + Number(b.qty) * Number(b.avgCost), 0);
 
-  const [cashBalances, customerBalances, supplierBalances] = await Promise.all([
-    Promise.all(
-      cashBoxes.map(async (box) => {
-        const [inSum, outSum] = await Promise.all([
-          prisma.cashTransaction.aggregate({ where: { companyId, cashBoxId: box.id, direction: "IN" }, _sum: { amount: true } }),
-          prisma.cashTransaction.aggregate({ where: { companyId, cashBoxId: box.id, direction: "OUT" }, _sum: { amount: true } }),
-        ]);
-        return Number(inSum._sum.amount ?? 0) - Number(outSum._sum.amount ?? 0);
-      }),
-    ),
-    Promise.all(
-      customers.map(async (c) => {
-        const last = await prisma.customerTransaction.findFirst({ where: { companyId, customerId: c.id }, orderBy: { id: "desc" } });
-        return last ? Number(last.balanceAfter) : Number(c.openingBalance);
-      }),
-    ),
-    Promise.all(
-      suppliers.map(async (s) => {
-        const last = await prisma.supplierTransaction.findFirst({ where: { companyId, supplierId: s.id }, orderBy: { id: "desc" } });
-        return last ? Number(last.balanceAfter) : Number(s.openingBalance);
-      }),
-    ),
+  // مُحسَّن عن نمط N+1 (استعلام منفصل لكل عميل/مورد/خزينة) إلى عدد ثابت من الاستعلامات
+  // بصرف النظر عن عدد الصفوف — يهم فعليًا عند شركة بمئات العملاء/الموردين، وليس تحسينًا
+  // مبكرًا: نفس الفرق بين استعلام واحد ومئات الاستعلامات المتزامنة على كل تحميل للوحة.
+  const [cashSums, latestCustomerTx, latestSupplierTx] = await Promise.all([
+    prisma.cashTransaction.groupBy({ by: ["cashBoxId", "direction"], where: { companyId }, _sum: { amount: true } }),
+    customers.length === 0
+      ? Promise.resolve([])
+      : prisma.customerTransaction.groupBy({ by: ["customerId"], where: { companyId }, _max: { id: true } }),
+    suppliers.length === 0
+      ? Promise.resolve([])
+      : prisma.supplierTransaction.groupBy({ by: ["supplierId"], where: { companyId }, _max: { id: true } }),
   ]);
+
+  const cashSumByBox = new Map<number, { in: number; out: number }>();
+  for (const row of cashSums) {
+    const entry = cashSumByBox.get(row.cashBoxId) ?? { in: 0, out: 0 };
+    if (row.direction === "IN") entry.in = Number(row._sum.amount ?? 0);
+    else entry.out = Number(row._sum.amount ?? 0);
+    cashSumByBox.set(row.cashBoxId, entry);
+  }
+  const cashBalances = cashBoxes.map((box) => {
+    const sums = cashSumByBox.get(box.id) ?? { in: 0, out: 0 };
+    return sums.in - sums.out;
+  });
+
+  const customerLatestIds = latestCustomerTx.map((r) => r._max.id).filter((id): id is number => id !== null);
+  const customerTxRows =
+    customerLatestIds.length === 0 ? [] : await prisma.customerTransaction.findMany({ where: { id: { in: customerLatestIds } } });
+  const balanceByCustomerId = new Map(customerTxRows.map((t) => [t.customerId, Number(t.balanceAfter)]));
+  const customerBalances = customers.map((c) => balanceByCustomerId.get(c.id) ?? Number(c.openingBalance));
+
+  const supplierLatestIds = latestSupplierTx.map((r) => r._max.id).filter((id): id is number => id !== null);
+  const supplierTxRows =
+    supplierLatestIds.length === 0 ? [] : await prisma.supplierTransaction.findMany({ where: { id: { in: supplierLatestIds } } });
+  const balanceBySupplierId = new Map(supplierTxRows.map((t) => [t.supplierId, Number(t.balanceAfter)]));
+  const supplierBalances = suppliers.map((s) => balanceBySupplierId.get(s.id) ?? Number(s.openingBalance));
 
   const supplierIds = topSuppliers.map((s) => s.supplierId);
   const supplierRecords = await prisma.supplier.findMany({ where: { id: { in: supplierIds } } });

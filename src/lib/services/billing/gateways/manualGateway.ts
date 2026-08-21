@@ -28,6 +28,7 @@ export function manualGateway(methodCode: string): PaymentGateway {
 
   return {
     code: methodCode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- ctx غير مستخدم هنا لكن الواجهة PaymentGateway تتطلبه
     async createCheckout(_ctx: CheckoutContext): Promise<CheckoutResult> {
       return { kind: "manual", instructions: info.instructions() };
     },

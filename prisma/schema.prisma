@@ -16,6 +16,18 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+/** يسجّل كل محاولة دخول (ناجحة أو فاشلة) — تنسيق موحّد للتحقق من Brute-Force على تسجيل
+ * دخول الشركات والأدمن معًا (identifier مسبوق بـ "admin:" لمحاولات الأدمن لفصل العدّادين).
+ * جدول DB وليس In-Memory عمدًا — يعمل بشكل صحيح عبر نسخ Serverless متعددة (Vercel). */
+model LoginAttempt {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  success    Boolean
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, createdAt])
+}
+
 // ============================================================================
 // 1) PLATFORM LEVEL — لا يوجد companyId هنا (خارج نطاق الـ Tenant)
 // ============================================================================
@@ -32,6 +44,24 @@ model PlatformAdmin {
   updatedAt    DateTime  @updatedAt
 
   reviewedPayments Payment[]
+  auditLogs        PlatformAuditLog[]
+}
+
+/** سجل تدقيق لإجراءات أدمن المنصة الحساسة (بند 8 — Admin Security §Phase 16) — منفصل عن
+ * AuditLog الخاص بمستخدمي الشركات (ذاك مربوط بـ companyId إلزاميًا؛ إجراءات الأدمن مثل
+ * تعديل خطة عامة لا تخص شركة واحدة بالضرورة). */
+model PlatformAuditLog {
+  id         Int           @id @default(autoincrement())
+  adminId    Int
+  admin      PlatformAdmin @relation(fields: [adminId], references: [id])
+  action     String // "company.suspend" | "company.activate" | "payment.approve" | "payment.reject" | "plan.update" | "planPrice.upsert" | "planPrice.delete" | "exchangeRate.upsert" | "exchangeRate.delete"
+  targetType String // "company" | "payment" | "plan" | "planPrice" | "exchangeRate"
+  targetId   Int?
+  details    Json?
+  createdAt  DateTime      @default(now())
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
 }
 
 model Plan {
