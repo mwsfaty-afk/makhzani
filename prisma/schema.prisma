@@ -435,10 +435,12 @@ model Item {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  stockBalances  StockBalance[]
-  stockMovements StockMovement[]
-  purchaseItems  PurchaseItem[]
-  saleItems      SaleItem[]
+  stockBalances       StockBalance[]
+  stockMovements      StockMovement[]
+  purchaseItems       PurchaseItem[]
+  saleItems           SaleItem[]
+  purchaseReturnItems PurchaseReturnItem[]
+  saleReturnItems     SaleReturnItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -578,20 +580,21 @@ model Purchase {
 }
 
 model PurchaseItem {
-  id              Int      @id @default(autoincrement())
-  purchaseId      Int
-  purchase        Purchase @relation(fields: [purchaseId], references: [id])
-  itemId          Int
-  item            Item     @relation(fields: [itemId], references: [id])
-  unitId          Int
-  unit            Unit     @relation(fields: [unitId], references: [id])
-  qty             Decimal  @db.Decimal(18, 4)
-  bonusQty        Decimal  @default(0) @db.Decimal(18, 4)
-  unitPrice       Decimal  @db.Decimal(18, 4)
-  discount        Decimal  @default(0) @db.Decimal(18, 4)
-  tax             Decimal  @default(0) @db.Decimal(18, 4)
-  total           Decimal  @db.Decimal(18, 4)
-  costPerBaseUnit Decimal  @db.Decimal(18, 6) // بعد تحويل الوحدة للـ Base Unit
+  id                  Int                  @id @default(autoincrement())
+  purchaseId          Int
+  purchase            Purchase             @relation(fields: [purchaseId], references: [id])
+  itemId              Int
+  item                Item                 @relation(fields: [itemId], references: [id])
+  unitId              Int
+  unit                Unit                 @relation(fields: [unitId], references: [id])
+  qty                 Decimal              @db.Decimal(18, 4)
+  bonusQty            Decimal              @default(0) @db.Decimal(18, 4)
+  unitPrice           Decimal              @db.Decimal(18, 4)
+  discount            Decimal              @default(0) @db.Decimal(18, 4)
+  tax                 Decimal              @default(0) @db.Decimal(18, 4)
+  total               Decimal              @db.Decimal(18, 4)
+  costPerBaseUnit     Decimal              @db.Decimal(18, 6) // بعد تحويل الوحدة للـ Base Unit
+  purchaseReturnItems PurchaseReturnItem[]
 }
 
 model PurchaseReturn {
@@ -617,7 +620,10 @@ model PurchaseReturnItem {
   id               Int            @id @default(autoincrement())
   purchaseReturnId Int
   purchaseReturn   PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
+  purchaseItemId   Int // السطر الأصلي في فاتورة الشراء — لمعرفة الوحدة ومعامل التحويل
+  purchaseItem     PurchaseItem   @relation(fields: [purchaseItemId], references: [id])
   itemId           Int
+  item             Item           @relation(fields: [itemId], references: [id])
   qty              Decimal        @db.Decimal(18, 4)
   unitPrice        Decimal        @db.Decimal(18, 4)
   total            Decimal        @db.Decimal(18, 4)
@@ -693,21 +699,22 @@ model Sale {
 }
 
 model SaleItem {
-  id              Int     @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   saleId          Int
-  sale            Sale    @relation(fields: [saleId], references: [id])
+  sale            Sale             @relation(fields: [saleId], references: [id])
   itemId          Int
-  item            Item    @relation(fields: [itemId], references: [id])
+  item            Item             @relation(fields: [itemId], references: [id])
   unitId          Int
-  unit            Unit    @relation(fields: [unitId], references: [id])
-  qty             Decimal @db.Decimal(18, 4)
-  unitPrice       Decimal @db.Decimal(18, 4)
-  discount        Decimal @default(0) @db.Decimal(18, 4)
-  tax             Decimal @default(0) @db.Decimal(18, 4)
-  costPerBaseUnit Decimal @db.Decimal(18, 6) // متوسط التكلفة وقت البيع (Moving Average)
-  totalCost       Decimal @db.Decimal(18, 4)
-  profit          Decimal @db.Decimal(18, 4)
-  total           Decimal @db.Decimal(18, 4)
+  unit            Unit             @relation(fields: [unitId], references: [id])
+  qty             Decimal          @db.Decimal(18, 4)
+  unitPrice       Decimal          @db.Decimal(18, 4)
+  discount        Decimal          @default(0) @db.Decimal(18, 4)
+  tax             Decimal          @default(0) @db.Decimal(18, 4)
+  costPerBaseUnit Decimal          @db.Decimal(18, 6) // متوسط التكلفة وقت البيع (Moving Average)
+  totalCost       Decimal          @db.Decimal(18, 4)
+  profit          Decimal          @db.Decimal(18, 4)
+  total           Decimal          @db.Decimal(18, 4)
+  saleReturnItems SaleReturnItem[]
 }
 
 model SaleReturn {
@@ -734,7 +741,10 @@ model SaleReturnItem {
   id           Int        @id @default(autoincrement())
   saleReturnId Int
   saleReturn   SaleReturn @relation(fields: [saleReturnId], references: [id])
+  saleItemId   Int // السطر الأصلي في فاتورة البيع — لمعرفة تكلفته وقت البيع (لحساب الربح المرتجع بدقة)
+  saleItem     SaleItem   @relation(fields: [saleItemId], references: [id])
   itemId       Int
+  item         Item       @relation(fields: [itemId], references: [id])
   qty          Decimal    @db.Decimal(18, 4)
   unitPrice    Decimal    @db.Decimal(18, 4)
   total        Decimal    @db.Decimal(18, 4)

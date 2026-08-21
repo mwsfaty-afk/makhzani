@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,23 +46,28 @@ export function PurchaseStatusActions({ purchaseId, status }: { purchaseId: numb
 
   if (status === "POSTED") {
     return (
-      <AlertDialog>
-        <AlertDialogTrigger render={<Button variant="outline" />}>إلغاء الفاتورة</AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>إلغاء فاتورة الشراء؟</AlertDialogTitle>
-            <AlertDialogDescription>
-              سيتم عكس أثرها بالكامل على المخزون ورصيد المورد والخزينة. لن يتم حذف الفاتورة نفسها.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>تراجع</AlertDialogCancel>
-            <AlertDialogAction disabled={pending} onClick={handleCancel} className="bg-destructive text-white hover:bg-destructive/90">
-              {pending ? "جارٍ الإلغاء..." : "تأكيد الإلغاء"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <div className="flex items-center gap-2">
+        <Button variant="outline" render={<Link href={`/dashboard/purchases/${purchaseId}/return`} />}>
+          إرجاع
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger render={<Button variant="outline" />}>إلغاء الفاتورة</AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>إلغاء فاتورة الشراء؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                سيتم عكس أثرها بالكامل على المخزون ورصيد المورد والخزينة. لن يتم حذف الفاتورة نفسها.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>تراجع</AlertDialogCancel>
+              <AlertDialogAction disabled={pending} onClick={handleCancel} className="bg-destructive text-white hover:bg-destructive/90">
+                {pending ? "جارٍ الإلغاء..." : "تأكيد الإلغاء"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     );
   }
 
