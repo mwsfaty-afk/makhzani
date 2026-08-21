@@ -1,0 +1,87 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requirePlatformAdmin } from "@/lib/auth/adminSession";
+import { prisma } from "@/lib/db/prisma";
+
+const planSchema = z.object({
+  nameAr: z.string().min(1),
+  description: z.string().optional(),
+  price: z.coerce.number().min(0),
+  currency: z.string().min(1),
+  durationDays: z.coerce.number().int().min(0),
+  maxUsers: z.coerce.number().int().min(1),
+  maxBranches: z.coerce.number().int().min(1),
+  maxWarehouses: z.coerce.number().int().min(1),
+  maxItems: z.coerce.number().int().min(1),
+  maxCustomers: z.coerce.number().int().min(1),
+  maxSuppliers: z.coerce.number().int().min(1),
+  maxMonthlyDocuments: z.coerce.number().int().min(1),
+  maxStorageMb: z.coerce.number().int().min(1),
+  isActive: z.enum(["on"]).optional(),
+  isPublic: z.enum(["on"]).optional(),
+});
+
+export async function updatePlanAction(planId: number, formData: FormData) {
+  await requirePlatformAdmin();
+
+  const parsed = planSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+
+  await prisma.plan.update({
+    where: { id: planId },
+    data: {
+      nameAr: d.nameAr,
+      description: d.description || undefined,
+      price: d.price,
+      currency: d.currency,
+      durationDays: d.durationDays,
+      maxUsers: d.maxUsers,
+      maxBranches: d.maxBranches,
+      maxWarehouses: d.maxWarehouses,
+      maxItems: d.maxItems,
+      maxCustomers: d.maxCustomers,
+      maxSuppliers: d.maxSuppliers,
+      maxMonthlyDocuments: d.maxMonthlyDocuments,
+      maxStorageMb: d.maxStorageMb,
+      isActive: d.isActive === "on",
+      isPublic: d.isPublic === "on",
+    },
+  });
+
+  revalidatePath(`/admin/plans/${planId}`);
+  revalidatePath("/admin/plans");
+  return { success: true };
+}
+
+const planPriceSchema = z.object({
+  countryCode: z.string().length(2),
+  currency: z.string().min(1),
+  price: z.coerce.number().min(0),
+});
+
+export async function upsertPlanPriceAction(planId: number, formData: FormData) {
+  await requirePlatformAdmin();
+
+  const parsed = planPriceSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+
+  await prisma.planPrice.upsert({
+    where: { planId_countryCode: { planId, countryCode: d.countryCode.toUpperCase() } },
+    update: { currency: d.currency.toUpperCase(), price: d.price },
+    create: { planId, countryCode: d.countryCode.toUpperCase(), currency: d.currency.toUpperCase(), price: d.price },
+  });
+
+  revalidatePath(`/admin/plans/${planId}`);
+  return { success: true };
+}
+
+export async function deletePlanPriceAction(planId: number, planPriceId: number) {
+  await requirePlatformAdmin();
+  await prisma.planPrice.delete({ where: { id: planPriceId } });
+  revalidatePath(`/admin/plans/${planId}`);
+  return { success: true };
+}

@@ -1,9 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { requirePlatformAdmin } from "@/lib/auth/adminSession";
-import { destroyAdminSession } from "@/lib/auth/adminSession";
 import { activateSubscriptionFromPayment, rejectManualPayment } from "@/lib/services/billing/activateSubscription";
 
 export async function approvePaymentAction(paymentId: number) {
@@ -29,9 +27,4 @@ export async function rejectPaymentAction(paymentId: number, formData: FormData)
   }
   revalidatePath("/admin/payments");
   return { success: true };
-}
-
-export async function adminLogoutAction() {
-  await destroyAdminSession();
-  redirect("/admin/login");
 }

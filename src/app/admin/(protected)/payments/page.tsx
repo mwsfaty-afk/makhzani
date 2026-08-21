@@ -1,12 +1,9 @@
-import { requirePlatformAdmin } from "@/lib/auth/adminSession";
 import { prisma } from "@/lib/db/prisma";
 import { manualMethodLabel } from "@/lib/services/billing/gateways";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PaymentReviewActions } from "./PaymentReviewActions";
-import { adminLogoutAction } from "./actions";
 
 const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   PENDING: { label: "قيد المراجعة", variant: "secondary" },
@@ -27,8 +24,6 @@ function gatewayLabel(code: string) {
 }
 
 export default async function AdminPaymentsPage() {
-  const admin = await requirePlatformAdmin();
-
   const [pending, recent] = await Promise.all([
     prisma.payment.findMany({
       where: { status: "PENDING" },
@@ -44,18 +39,8 @@ export default async function AdminPaymentsPage() {
   ]);
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">مراجعة المدفوعات</h1>
-          <p className="text-sm text-muted-foreground">مسجَّل الدخول كـ {admin.name}</p>
-        </div>
-        <form action={adminLogoutAction}>
-          <Button type="submit" variant="outline" size="sm">
-            تسجيل الخروج
-          </Button>
-        </form>
-      </div>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-bold">مراجعة المدفوعات</h1>
 
       <Card>
         <CardHeader>

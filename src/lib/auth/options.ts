@@ -18,9 +18,11 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email.toLowerCase().trim() },
-          include: { role: true },
+          include: { role: true, company: true },
         });
         if (!user || !user.isActive) return null;
+        // شركة معطَّلة (Phase 15 §admin) — تمنع الدخول فورًا حتى لو كانت بيانات المستخدم صحيحة
+        if (user.company.status !== "ACTIVE") return null;
 
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;
