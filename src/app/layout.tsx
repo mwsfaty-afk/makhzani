@@ -18,8 +18,13 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Makhzani | مخزني",
+  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
+  title: {
+    default: "مخزني — نظام إدارة المخزون والمبيعات والمشتريات",
+    template: "%s | مخزني",
+  },
   description: "نظام SaaS لإدارة المخازن والمبيعات والمشتريات",
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
