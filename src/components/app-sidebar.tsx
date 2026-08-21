@@ -18,6 +18,7 @@ import {
   Warehouse,
   Award,
   ClipboardList,
+  ArrowLeftRight,
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,6 +39,7 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; disa
 
 const inventoryLinks: NavItem[] = [
   { href: "/dashboard/inventory/stock", label: "أرصدة المخزون", icon: ClipboardList },
+  { href: "/dashboard/inventory/transfers", label: "التحويلات", icon: ArrowLeftRight },
   { href: "/dashboard/inventory/items", label: "الأصناف", icon: Package },
   { href: "/dashboard/inventory/categories", label: "المجموعات", icon: Tags },
   { href: "/dashboard/inventory/brands", label: "العلامات التجارية", icon: Award },

@@ -334,6 +334,8 @@ model Warehouse {
   stockMovements   StockMovement[]
   stockBalances    StockBalance[]
   stockAdjustments StockAdjustment[]
+  transfersOut     StockTransfer[]     @relation("TransferFrom")
+  transfersIn      StockTransfer[]     @relation("TransferTo")
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -441,6 +443,7 @@ model Item {
   saleItems           SaleItem[]
   purchaseReturnItems PurchaseReturnItem[]
   saleReturnItems     SaleReturnItem[]
+  stockTransferItems  StockTransferItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -845,7 +848,9 @@ model StockTransfer {
   docNo           String
   date            DateTime
   fromWarehouseId Int
+  fromWarehouse   Warehouse @relation("TransferFrom", fields: [fromWarehouseId], references: [id])
   toWarehouseId   Int
+  toWarehouse     Warehouse @relation("TransferTo", fields: [toWarehouseId], references: [id])
   status          DocStatus @default(DRAFT)
   notes           String?
   userId          Int
@@ -863,6 +868,7 @@ model StockTransferItem {
   stockTransferId Int
   stockTransfer   StockTransfer @relation(fields: [stockTransferId], references: [id])
   itemId          Int
+  item            Item          @relation(fields: [itemId], references: [id])
   qty             Decimal       @db.Decimal(18, 4)
   unitCost        Decimal       @db.Decimal(18, 6)
 }
