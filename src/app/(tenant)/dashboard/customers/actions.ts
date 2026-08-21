@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { collectFromCustomer } from "@/lib/services/customers/collectFromCustomer";
 
 const schema = z.object({
   code: z.string().min(1, "كود العميل مطلوب"),
@@ -26,6 +27,20 @@ export async function createCustomer(formData: FormData) {
     return { error: "كود العميل مستخدم بالفعل" };
   }
   revalidatePath("/dashboard/customers");
+  return { success: true };
+}
+
+export async function collectFromCustomerAction(customerId: number, formData: FormData) {
+  const { companyId, userId } = await requireTenant();
+  const amount = Number(formData.get("amount"));
+  const notes = String(formData.get("notes") ?? "") || undefined;
+
+  try {
+    await collectFromCustomer({ companyId, userId, customerId, amount, notes });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء التحصيل" };
+  }
+  revalidatePath(`/dashboard/customers/${customerId}`);
   return { success: true };
 }
 

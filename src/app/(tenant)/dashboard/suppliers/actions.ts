@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireTenant } from "@/lib/auth/session";
+import { payToSupplier } from "@/lib/services/suppliers/payToSupplier";
 
 const schema = z.object({
   code: z.string().min(1, "كود المورد مطلوب"),
@@ -26,6 +27,20 @@ export async function createSupplier(formData: FormData) {
     return { error: "كود المورد مستخدم بالفعل" };
   }
   revalidatePath("/dashboard/suppliers");
+  return { success: true };
+}
+
+export async function payToSupplierAction(supplierId: number, formData: FormData) {
+  const { companyId, userId } = await requireTenant();
+  const amount = Number(formData.get("amount"));
+  const notes = String(formData.get("notes") ?? "") || undefined;
+
+  try {
+    await payToSupplier({ companyId, userId, supplierId, amount, notes });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "حدث خطأ أثناء السداد" };
+  }
+  revalidatePath(`/dashboard/suppliers/${supplierId}`);
   return { success: true };
 }
 
