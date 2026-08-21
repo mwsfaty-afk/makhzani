@@ -58,7 +58,7 @@ const mainLinks: NavItem[] = [
 const bottomLinks: NavItem[] = [
   { href: "/dashboard/customers", label: "العملاء", icon: Users },
   { href: "/dashboard/suppliers", label: "الموردون", icon: Building2 },
-  { href: "/dashboard/cash", label: "الخزينة", icon: Wallet, disabled: true },
+  { href: "/dashboard/cash", label: "الخزينة", icon: Wallet },
   { href: "/dashboard/reports", label: "التقارير", icon: BarChart3, disabled: true },
   { href: "/dashboard/settings", label: "الإعدادات", icon: Settings, disabled: true },
 ];
