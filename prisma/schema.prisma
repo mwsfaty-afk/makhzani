@@ -496,6 +496,7 @@ model Item {
   saleReturnItems     SaleReturnItem[]
   stockTransferItems  StockTransferItem[]
   stockTakeItems      StockTakeItem[]
+  stockAdjustmentItems StockAdjustmentItem[]
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -841,6 +842,9 @@ model StockMovement {
   unitCost     Decimal      @db.Decimal(18, 6) // Moving Average وقت الحركة
   totalCost    Decimal      @db.Decimal(18, 4)
   balanceAfter Decimal      @db.Decimal(18, 4) // Snapshot للأداء ولل Stock Card
+  // تاريخ صلاحية اختياري يُسجَّل فقط عند حركات التوريد (IN) — لغرض التنبيه فقط، وليس
+  // تتبع دفعات (Batch/Lot) حقيقي: لا يُستخدَم لتحديد أي دفعة تُخصَم منها حركات الصرف.
+  expiryDate   DateTime?
   userId       Int
   notes        String?
   createdAt    DateTime     @default(now())
@@ -874,6 +878,7 @@ model StockAdjustment {
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
   reason      String // "opening" | "damage" | "consumption" | "sample" | "other"
   direction   String // "IN" | "OUT"
+  notes       String?
   status      DocStatus @default(DRAFT)
   userId      Int
   postedAt    DateTime?
@@ -890,8 +895,12 @@ model StockAdjustmentItem {
   stockAdjustmentId Int
   stockAdjustment   StockAdjustment @relation(fields: [stockAdjustmentId], references: [id])
   itemId            Int
+  item              Item            @relation(fields: [itemId], references: [id])
   qty               Decimal         @db.Decimal(18, 4)
   unitCost          Decimal         @db.Decimal(18, 6)
+  // نفس ملاحظة StockMovement.expiryDate — تخزين مرحلي في بند المستند (قبل الاعتماد)
+  // إلى أن يُنسَخ لصف StockMovement الفعلي عند الترحيل.
+  expiryDate        DateTime?
 }
 
 model StockTransfer {

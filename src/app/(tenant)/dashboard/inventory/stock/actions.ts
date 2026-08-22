@@ -8,9 +8,7 @@ import { checkPermission } from "@/lib/auth/permissions";
 import { recordStockMovement, InsufficientStockError } from "@/lib/services/inventory/stockMovement";
 import { nextDocumentNumber } from "@/lib/services/documentNumbering";
 import { assertSubscriptionActive, SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
-
-const IN_REASONS = ["opening", "adjustment", "gift", "production", "other"] as const;
-const OUT_REASONS = ["damage", "consumption", "sample", "production", "other"] as const;
+import { IN_REASONS, OUT_REASONS, movementTypeForAdjustment } from "@/lib/services/inventory/adjustmentReasons";
 
 const schema = z.object({
   itemId: z.coerce.number().int().positive(),
@@ -20,6 +18,7 @@ const schema = z.object({
   unitCost: z.coerce.number().min(0).optional(),
   reason: z.string().min(1),
   notes: z.string().optional(),
+  expiryDate: z.preprocess((v) => (v === "" ? undefined : v), z.coerce.date().optional()),
 });
 
 export async function adjustStock(formData: FormData): Promise<{ error?: string; success?: boolean }> {
@@ -45,7 +44,7 @@ export async function adjustStock(formData: FormData): Promise<{ error?: string;
 
   const company = await prisma.company.findUniqueOrThrow({ where: { id: companyId } });
   const docType = d.direction === "IN" ? "stock_in" : "stock_out";
-  const movementType = d.direction === "IN" ? (d.reason === "opening" ? "OPENING_BALANCE" : "STOCK_ADJUSTMENT_IN") : d.reason === "damage" ? "DAMAGE" : "STOCK_ADJUSTMENT_OUT";
+  const movementType = movementTypeForAdjustment(d.direction, d.reason);
 
   try {
     await assertSubscriptionActive(companyId);
@@ -73,7 +72,8 @@ export async function adjustStock(formData: FormData): Promise<{ error?: string;
           itemId: d.itemId,
           qty: d.qty,
           unitCost: d.direction === "IN" ? d.unitCost! : 0,
-        },
+          expiryDate: d.direction === "IN" ? d.expiryDate : undefined,
+        } as never,
       });
 
       await recordStockMovement(tx, {
@@ -88,6 +88,7 @@ export async function adjustStock(formData: FormData): Promise<{ error?: string;
         userId,
         notes: d.notes,
         allowNegativeStock: company.allowNegativeStock,
+        expiryDate: d.direction === "IN" ? d.expiryDate : undefined,
         ...(d.direction === "IN" ? { qtyIn: d.qty, unitCost: d.unitCost! } : { qtyOut: d.qty }),
       } as never);
 

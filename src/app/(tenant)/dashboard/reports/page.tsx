@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TrendingUp, Package, AlertTriangle, ShoppingCart, Truck } from "lucide-react";
+import { TrendingUp, Package, AlertTriangle, ShoppingCart, Truck, PackageX, Zap, CalendarClock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const reports = [
@@ -20,6 +20,24 @@ const reports = [
     icon: AlertTriangle,
     title: "الأصناف تحت حد الطلب",
     description: "الأصناف التي نفدت أو اقتربت من النفاد",
+  },
+  {
+    href: "/dashboard/reports/dead-stock",
+    icon: PackageX,
+    title: "الأصناف الراكدة",
+    description: "أصناف لها رصيد لكن لم تتحرك منذ فترة محددة",
+  },
+  {
+    href: "/dashboard/reports/fast-moving",
+    icon: Zap,
+    title: "الأصناف الأكثر حركة",
+    description: "أعلى الأصناف كميةً في حركات الصرف خلال فترة محددة",
+  },
+  {
+    href: "/dashboard/reports/expiring",
+    icon: CalendarClock,
+    title: "أصناف قرب انتهاء الصلاحية",
+    description: "تنبيه تقديري بناءً على تواريخ الصلاحية المسجَّلة عند التوريد",
   },
   {
     href: "/dashboard/reports/sales",

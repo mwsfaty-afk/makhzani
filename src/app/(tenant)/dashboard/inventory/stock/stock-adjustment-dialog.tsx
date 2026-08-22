@@ -15,25 +15,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { IN_REASONS, OUT_REASONS, IN_REASON_LABELS, OUT_REASON_LABELS } from "@/lib/services/inventory/adjustmentReasons";
 import { adjustStock } from "./actions";
 
 type Option = { id: number; label: string };
 
-const IN_REASONS = [
-  { value: "opening", label: "رصيد افتتاحي" },
-  { value: "adjustment", label: "تسوية" },
-  { value: "gift", label: "هدية" },
-  { value: "production", label: "إنتاج" },
-  { value: "other", label: "أخرى" },
-];
-
-const OUT_REASONS = [
-  { value: "damage", label: "هالك" },
-  { value: "consumption", label: "استهلاك" },
-  { value: "sample", label: "عينات" },
-  { value: "production", label: "إنتاج" },
-  { value: "other", label: "أخرى" },
-];
+const IN_REASON_OPTIONS = IN_REASONS.map((value) => ({ value, label: IN_REASON_LABELS[value] }));
+const OUT_REASON_OPTIONS = OUT_REASONS.map((value) => ({ value, label: OUT_REASON_LABELS[value] }));
 
 export function StockAdjustmentDialog({ items, warehouses }: { items: Option[]; warehouses: Option[] }) {
   const [open, setOpen] = useState(false);
@@ -41,7 +29,7 @@ export function StockAdjustmentDialog({ items, warehouses }: { items: Option[]; 
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const reasons = direction === "IN" ? IN_REASONS : OUT_REASONS;
+  const reasons = direction === "IN" ? IN_REASON_OPTIONS : OUT_REASON_OPTIONS;
 
   function handleSubmit(formData: FormData) {
     setError(null);
@@ -149,6 +137,13 @@ export function StockAdjustmentDialog({ items, warehouses }: { items: Option[]; 
                 </div>
               )}
             </div>
+
+            {direction === "IN" && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="expiryDate">تاريخ الصلاحية (اختياري)</Label>
+                <Input id="expiryDate" name="expiryDate" type="date" />
+              </div>
+            )}
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="notes">ملاحظات (اختياري)</Label>

@@ -21,6 +21,7 @@ import {
   ArrowLeftRight,
   ClipboardCheck,
   CreditCard,
+  ListOrdered,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; disa
 
 const inventoryLinks: NavItem[] = [
   { href: "/dashboard/inventory/stock", label: "أرصدة المخزون", icon: ClipboardList },
+  { href: "/dashboard/inventory/stock-orders", label: "أوامر التوريد والصرف", icon: ListOrdered },
   { href: "/dashboard/inventory/transfers", label: "التحويلات", icon: ArrowLeftRight },
   { href: "/dashboard/inventory/stock-take", label: "الجرد", icon: ClipboardCheck },
   { href: "/dashboard/inventory/items", label: "الأصناف", icon: Package },
@@ -109,14 +111,17 @@ export function AppSidebar({ companyName }: { companyName: string }) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton render={<Link href="/dashboard/inventory" />} isActive={pathname === "/dashboard/inventory"}>
                   <Boxes />
                   <span>إدارة المخزون</span>
                 </SidebarMenuButton>
                 <SidebarMenuSub>
                   {inventoryLinks.map((item) => (
                     <SidebarMenuSubItem key={item.href}>
-                      <SidebarMenuSubButton render={<Link href={item.href} />} isActive={pathname.startsWith(item.href)}>
+                      <SidebarMenuSubButton
+                        render={<Link href={item.href} />}
+                        isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                      >
                         <item.icon />
                         <span>{item.label}</span>
                       </SidebarMenuSubButton>

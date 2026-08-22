@@ -25,6 +25,9 @@ export type RecordStockMovementInput = {
   userId: number;
   notes?: string;
   allowNegativeStock: boolean;
+  /** تاريخ صلاحية اختياري — تنبيه فقط، لا يُستخدَم لأي منطق حساب هنا (راجع ملاحظة
+   * الحقل في schema.prisma). ذو معنى فقط لحركات IN. */
+  expiryDate?: Date;
 } & (
   | { qtyIn: number | string | Decimal; unitCost: number | string | Decimal; qtyOut?: never; reverseUnitCost?: never }
   | { qtyOut: number | string | Decimal; qtyIn?: never; unitCost?: never; reverseUnitCost?: number | string | Decimal }
@@ -111,6 +114,7 @@ export async function recordStockMovement(tx: Tx, input: RecordStockMovementInpu
       balanceAfter: newQty,
       userId: input.userId,
       notes: input.notes,
+      expiryDate: input.expiryDate,
     } as never,
   });
 
