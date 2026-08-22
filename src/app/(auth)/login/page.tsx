@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,7 +37,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-8 p-6">
+      <div className="flex flex-col items-center gap-2 text-center">
+        <Logo size="lg" />
+        <p className="text-sm text-muted-foreground">نظام لإدارة المخازن والمستودعات</p>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">تسجيل الدخول</CardTitle>
