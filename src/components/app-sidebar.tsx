@@ -62,7 +62,7 @@ const bottomLinks: NavItem[] = [
   { href: "/dashboard/cash", label: "الخزينة", icon: Wallet },
   { href: "/dashboard/reports", label: "التقارير", icon: BarChart3 },
   { href: "/dashboard/billing", label: "الفوترة والاشتراك", icon: CreditCard },
-  { href: "/dashboard/settings", label: "الإعدادات", icon: Settings, disabled: true },
+  { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
 ];
 
 export function AppSidebar({ companyName }: { companyName: string }) {

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { manualMethodLabel } from "@/lib/services/billing/gateways";
+import { gatewayLabel } from "@/lib/services/billing/gateways";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,17 +11,6 @@ const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secon
   FAILED: { label: "مرفوضة / فشلت", variant: "destructive" },
   REFUNDED: { label: "مستردة", variant: "outline" },
 };
-
-const GATEWAY_LABELS: Record<string, string> = {
-  paypal: "PayPal",
-  vodafone_cash: "فودافون كاش",
-  al_rajhi_bank: "تحويل بنكي (الراجحي)",
-  mock: "بوابة اختبار (تطوير فقط)",
-};
-
-function gatewayLabel(code: string) {
-  return GATEWAY_LABELS[code] ?? manualMethodLabel(code);
-}
 
 export default async function AdminPaymentsPage() {
   const [pending, recent] = await Promise.all([

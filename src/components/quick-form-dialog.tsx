@@ -81,7 +81,7 @@ export function QuickFormDialog({
                 ) : field.type === "select" ? (
                   <>
                     <Label htmlFor={field.name}>{field.label}</Label>
-                    <Select name={field.name} defaultValue={field.defaultValue}>
+                    <Select name={field.name} defaultValue={field.defaultValue} items={field.options}>
                       <SelectTrigger id={field.name}>
                         <SelectValue placeholder="اختر..." />
                       </SelectTrigger>

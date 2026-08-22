@@ -1,12 +1,25 @@
 import type { PaymentGateway } from "./types";
 import { paypalGateway } from "./paypalGateway";
-import { manualGateway, MANUAL_METHOD_CODES } from "./manualGateway";
+import { manualGateway, manualMethodLabel, MANUAL_METHOD_CODES } from "./manualGateway";
 import { paytabsGateway } from "./paytabsGateway";
 import { mockGateway } from "./mockGateway";
 
 export type { PaymentGateway, CheckoutContext, CheckoutResult } from "./types";
 export { manualMethodLabel, MANUAL_METHOD_CODES } from "./manualGateway";
 export { capturePaypalOrder } from "./paypalGateway";
+
+const NON_MANUAL_GATEWAY_LABELS: Record<string, string> = {
+  paypal: "PayPal",
+  paytabs: "PayTabs",
+  mock: "بوابة اختبار (تطوير فقط)",
+};
+
+/** الاسم العربي المعروض لأي كود بوابة دفع (يدوية أو تلقائية) — المدخل الوحيد
+ * المستخدم في كل مكان يعرض طريقة الدفع للمستخدم أو للأدمن، لتفادي عرض الكود
+ * الخام (مثل "vodafone_cash") في الواجهة. */
+export function gatewayLabel(code: string): string {
+  return NON_MANUAL_GATEWAY_LABELS[code] ?? manualMethodLabel(code);
+}
 
 /** كل طرق الدفع المعروضة للعميل — التلقائية أولًا ثم اليدوية، وفي بيئة التطوير فقط
  * تُضاف طريقة وهمية للاختبار السريع دون بيانات دفع حقيقية. */

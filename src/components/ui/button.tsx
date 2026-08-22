@@ -1,3 +1,4 @@
+import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -44,12 +45,23 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  render,
+  nativeButton,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // Base UI يفترض nativeButton=true افتراضيًا (أي أن العنصر الناتج بعد render حرفيًا
+  // <button>) — عندما نستخدم render لعنصر آخر (مثل <Link> لبناء زر-رابط، نمط شائع جدًا في
+  // هذا المشروع)، الناتج فعليًا <a> لا <button>؛ ترك القيمة الافتراضية يُطلق تحذيرًا حقيقيًا
+  // في كل مرة (ورُصد فعليًا في 15 ملفًا مختلفًا) بدل أن يُصلَح مرة واحدة هنا بشكل مركزي.
+  const resolvedNativeButton =
+    nativeButton ?? (React.isValidElement(render) && render.type !== "button" ? false : true)
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      render={render}
+      nativeButton={resolvedNativeButton}
       {...props}
     />
   )

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getSubscriptionWithPlan } from "@/lib/services/billing/subscriptionGuard";
 import { getUsageSummary } from "@/lib/services/billing/usage";
 import { getPlanPriceForCompany } from "@/lib/services/billing/pricing";
-import { listAvailableGatewayCodes, manualMethodLabel } from "@/lib/services/billing/gateways";
+import { listAvailableGatewayCodes, gatewayLabel } from "@/lib/services/billing/gateways";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,13 +16,6 @@ const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secon
   PAST_DUE: { label: "متأخر السداد", variant: "destructive" },
   EXPIRED: { label: "منتهي الصلاحية", variant: "destructive" },
   CANCELLED: { label: "ملغى", variant: "outline" },
-};
-
-const GATEWAY_LABELS: Record<string, string> = {
-  paypal: "PayPal",
-  vodafone_cash: "فودافون كاش",
-  al_rajhi_bank: "تحويل بنكي (الراجحي)",
-  mock: "بوابة اختبار (تطوير فقط)",
 };
 
 const PAYMENT_STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -175,7 +168,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
                           planId={plan.id}
                           gatewayCode={code}
                           variant={code === "paypal" ? "default" : "outline"}
-                          label={`الدفع عبر ${GATEWAY_LABELS[code] ?? manualMethodLabel(code)}`}
+                          label={`الدفع عبر ${gatewayLabel(code)}`}
                         />
                       ))}
                     </div>
@@ -213,7 +206,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
                     <TableRow key={p.id}>
                       <TableCell className="text-muted-foreground">{p.createdAt.toLocaleDateString("ar-EG")}</TableCell>
                       <TableCell>{p.plan.nameAr}</TableCell>
-                      <TableCell>{GATEWAY_LABELS[p.gateway] ?? manualMethodLabel(p.gateway)}</TableCell>
+                      <TableCell>{gatewayLabel(p.gateway)}</TableCell>
                       <TableCell className="font-mono tabular-nums">
                         {fmt(Number(p.amount))} {p.currency}
                       </TableCell>

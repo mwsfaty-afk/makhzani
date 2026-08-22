@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
+import { gatewayLabel } from "@/lib/services/billing/gateways";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -151,7 +152,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
                     <TableRow key={p.id}>
                       <TableCell className="text-muted-foreground">{p.createdAt.toLocaleDateString("ar-EG")}</TableCell>
                       <TableCell>{p.plan.nameAr}</TableCell>
-                      <TableCell>{p.gateway}</TableCell>
+                      <TableCell>{gatewayLabel(p.gateway)}</TableCell>
                       <TableCell className="font-mono tabular-nums">{Number(p.amount).toLocaleString("ar")} {p.currency}</TableCell>
                       <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
                     </TableRow>

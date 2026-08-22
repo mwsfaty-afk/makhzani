@@ -90,7 +90,14 @@ export function SaleReturnForm({ saleId, lines }: { saleId: number; lines: Line[
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="refundMethod">طريقة الاسترداد</Label>
-            <Select name="refundMethod" defaultValue="customer_credit">
+            <Select
+              name="refundMethod"
+              defaultValue="customer_credit"
+              items={[
+                { value: "customer_credit", label: "خصم من مديونية العميل" },
+                { value: "cash", label: "استرداد نقدي فوري" },
+              ]}
+            >
               <SelectTrigger id="refundMethod">
                 <SelectValue />
               </SelectTrigger>
