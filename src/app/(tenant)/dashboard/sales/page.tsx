@@ -58,7 +58,7 @@ export default async function SalesPage() {
                     <TableCell className="font-medium">{s.customer.name}</TableCell>
                     <TableCell className="text-muted-foreground">{s.warehouse.name}</TableCell>
                     <TableCell className="font-mono tabular-nums">{s.grandTotal.toString()}</TableCell>
-                    <TableCell className="font-mono tabular-nums text-green-700 dark:text-green-400">
+                    <TableCell className="font-mono tabular-nums text-success">
                       {s.status === "POSTED" ? s.totalProfit.toString() : "—"}
                     </TableCell>
                     <TableCell>

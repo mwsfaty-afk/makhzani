@@ -80,7 +80,7 @@ function SummaryCard({
     <Card>
       <CardContent className="py-4">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`font-mono text-xl font-bold tabular-nums ${highlight ? "text-green-700 dark:text-green-400" : ""}`}>
+        <p className={`font-mono text-xl font-bold tabular-nums ${highlight ? "text-success" : ""}`}>
           {value}
         </p>
         {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
@@ -131,7 +131,7 @@ function ReportTable({
                   <TableCell className="font-mono tabular-nums text-muted-foreground">
                     {r.cost.toLocaleString("ar")}
                   </TableCell>
-                  <TableCell className="font-mono tabular-nums font-medium text-green-700 dark:text-green-400">
+                  <TableCell className="font-mono tabular-nums font-medium text-success">
                     {r.profit.toLocaleString("ar")}
                   </TableCell>
                   <TableCell className="font-mono tabular-nums text-muted-foreground">

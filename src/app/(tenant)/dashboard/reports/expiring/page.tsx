@@ -110,7 +110,7 @@ export default async function ExpiringReportPage({
                     <TableCell className="text-muted-foreground">{r.expiryDate.toLocaleDateString("ar-EG")}</TableCell>
                     <TableCell>
                       <span
-                        className={`font-mono tabular-nums ${r.daysLeft <= 7 ? "text-destructive font-bold" : r.daysLeft <= 30 ? "text-amber-600 dark:text-amber-400" : ""}`}
+                        className={`font-mono tabular-nums ${r.daysLeft <= 7 ? "text-destructive font-bold" : r.daysLeft <= 30 ? "text-warning" : ""}`}
                       >
                         {r.daysLeft}
                       </span>

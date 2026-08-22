@@ -120,7 +120,7 @@ export default async function CashBoxDetailPage({ params }: { params: Promise<{ 
                     <TableCell>
                       <Badge variant="secondary">{TYPE_LABELS[t.type] ?? t.type}</Badge>
                     </TableCell>
-                    <TableCell className="font-mono tabular-nums text-green-700 dark:text-green-400">
+                    <TableCell className="font-mono tabular-nums text-success">
                       {t.direction === "IN" ? t.amount.toString() : "—"}
                     </TableCell>
                     <TableCell className="font-mono tabular-nums text-destructive">

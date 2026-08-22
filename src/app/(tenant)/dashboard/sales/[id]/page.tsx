@@ -78,7 +78,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
                   <TableCell className="font-mono tabular-nums">{line.unitPrice.toString()}</TableCell>
                   <TableCell className="font-mono tabular-nums font-medium">{line.total.toString()}</TableCell>
                   {sale.status === "POSTED" && (
-                    <TableCell className="font-mono tabular-nums text-green-700 dark:text-green-400">
+                    <TableCell className="font-mono tabular-nums text-success">
                       {line.profit.toString()}
                     </TableCell>
                   )}
@@ -108,7 +108,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             <span className="font-mono tabular-nums">{sale.remainingAmount.toString()}</span>
           </p>
           {sale.status === "POSTED" && (
-            <p className="font-medium text-green-700 dark:text-green-400">
+            <p className="font-medium text-success">
               إجمالي الربح: <span className="font-mono tabular-nums">{sale.totalProfit.toString()}</span>
             </p>
           )}

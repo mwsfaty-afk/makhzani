@@ -146,7 +146,7 @@ function Kpi({
         <p className={`font-mono text-xl font-bold tabular-nums ${highlight ? "text-primary" : ""}`}>{value}</p>
         {trend !== undefined && trend !== null && (
           <p
-            className={`mt-1 flex items-center gap-1 text-xs ${trend >= 0 ? "text-green-700 dark:text-green-400" : "text-destructive"}`}
+            className={`mt-1 flex items-center gap-1 text-xs ${trend >= 0 ? "text-success" : "text-destructive"}`}
           >
             {trend >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
             {Math.abs(trend).toFixed(1)}% عن الشهر السابق

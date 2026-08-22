@@ -110,7 +110,7 @@ export default async function DeadStockReportPage({
                     <TableCell className="font-mono tabular-nums">{r.qty.toLocaleString("ar")}</TableCell>
                     <TableCell className="text-muted-foreground">{r.lastOut ? r.lastOut.toLocaleDateString("ar-EG") : "لم يتحرك إطلاقًا"}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-amber-600 dark:text-amber-400 font-mono tabular-nums">
+                      <Badge variant="outline" className="text-warning font-mono tabular-nums">
                         {r.daysSince ?? "—"}
                       </Badge>
                     </TableCell>

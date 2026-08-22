@@ -75,7 +75,7 @@ export default async function StockCardPage({ params }: { params: Promise<{ item
                     </TableCell>
                     <TableCell className="font-mono text-sm">{m.documentNo}</TableCell>
                     <TableCell className="text-muted-foreground">{m.warehouse.name}</TableCell>
-                    <TableCell className="font-mono tabular-nums text-green-700 dark:text-green-400">
+                    <TableCell className="font-mono tabular-nums text-success">
                       {Number(m.qtyIn) > 0 ? m.qtyIn.toString() : "—"}
                     </TableCell>
                     <TableCell className="font-mono tabular-nums text-destructive">

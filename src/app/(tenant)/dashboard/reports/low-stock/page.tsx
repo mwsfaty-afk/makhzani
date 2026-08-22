@@ -78,7 +78,7 @@ export default async function LowStockReportPage() {
                       {r.outOfStock ? (
                         <Badge variant="destructive">نفد المخزون</Badge>
                       ) : (
-                        <Badge variant="outline" className="text-amber-600 dark:text-amber-400">
+                        <Badge variant="outline" className="text-warning">
                           تحت الحد
                         </Badge>
                       )}

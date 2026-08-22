@@ -47,9 +47,9 @@ export default async function InventoryControlCenterPage() {
                     <TableRow key={a.id}>
                       <TableCell className="w-8">
                         {a.kind === "in" ? (
-                          <ArrowDownToLine className="size-4 text-green-600 dark:text-green-400" />
+                          <ArrowDownToLine className="size-4 text-success" />
                         ) : (
-                          <ArrowUpFromLine className="size-4 text-amber-600 dark:text-amber-400" />
+                          <ArrowUpFromLine className="size-4 text-warning" />
                         )}
                       </TableCell>
                       <TableCell>
@@ -145,7 +145,7 @@ function LinkKpi({
     tone === "danger"
       ? "text-destructive"
       : tone === "warning"
-        ? "text-amber-600 dark:text-amber-400"
+        ? "text-warning"
         : tone === "link"
           ? "text-primary"
           : "";

@@ -66,7 +66,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
   return (
     <div className="flex flex-col gap-6">
       {sp.paypal === "success" && (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
+        <div className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
           تم الدفع عبر PayPal بنجاح — تم تفعيل اشتراكك الجديد.
         </div>
       )}
@@ -81,12 +81,12 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
         </div>
       )}
       {sp.mock === "success" && (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
+        <div className="rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
           تم تفعيل الاشتراك عبر بوابة الاختبار (لا يوجد دفع فعلي).
         </div>
       )}
       {sp.submitted === "1" && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300">
+        <div className="rounded-lg border border-info/30 bg-info/10 px-4 py-3 text-sm text-info">
           تم استلام بيانات الدفع بنجاح — سيراجعها فريق المنصة ويُفعَّل اشتراكك عند التأكد من التحويل.
         </div>
       )}

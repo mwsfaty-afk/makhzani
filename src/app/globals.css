@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-plex-arabic);
+  --font-sans: var(--font-tajawal);
   --font-mono: var(--font-plex-mono);
-  --font-heading: var(--font-plex-arabic);
+  --font-heading: var(--font-tajawal);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +39,22 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* توكِنز ألوان براند صريحة (Secondary/Accent من دليل الهوية) — منفصلة عمدًا عن
+     --secondary/--accent الدلالية أعلاه (تلك تبقى محايدة لأزرار/خلفيات ثانوية عامة).
+     تُستخدَم فقط لنقاط تمييز محددة: أيقونات، Highlights، شارات خاصة — وليس كخلفية
+     زر ثانوي عام أو نص أساسي، حفاظًا على قابلية القراءة. */
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-accent: var(--brand-accent);
+  /* توكِنز الحالة الدلالية — مصدر واحد للحقيقة بدل تكرار text-amber-600 dark:text-amber-400
+     وأمثالها في كل صفحة على حدة. */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,77 +64,108 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* هوية Makhzani: أزرق فولاذي + برونزي دافئ على أرضية ورقية دافئة — وليس رمادي Tailwind الافتراضي */
+/* هوية Makhzani الرسمية: أزرق #2563EB + بنفسجي #7C3AED + سماوي #06B6D4، على أرضية
+   Slate فاتحة ونظيفة — مطابقة لدليل الهوية البصرية المعتمد (2026-08-22)، وليست ارتجالية. */
 :root {
-  --background: #f6f4ef;
-  --foreground: #201d18;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #201d18;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #201d18;
-  --primary: #2c4a6e;
+  --popover-foreground: #0f172a;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --secondary: #efece3;
-  --secondary-foreground: #201d18;
-  --muted: #efece3;
-  --muted-foreground: #5c574d;
-  --accent: #e4ebf2;
-  --accent-foreground: #2c4a6e;
-  --destructive: #b3261e;
-  --border: #ddd7c8;
-  --input: #ddd7c8;
-  --ring: #2c4a6e;
-  --chart-1: #2c4a6e;
-  --chart-2: #a5722f;
-  --chart-3: #3f7a4f;
-  --chart-4: #7fa3cf;
-  --chart-5: #d3a868;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eff6ff;
+  --accent-foreground: #2563eb;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+
+  --brand-secondary: #7c3aed;
+  --brand-accent: #06b6d4;
+
+  --success: #10b981;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #201503;
+  --error: #ef4444;
+  --error-foreground: #ffffff;
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+
+  /* chart-1/2 مطابقان لأزرق/برتقالي dataviz skill المُتحقَّق منه فعليًا (Phase 13) — أي
+     رسم بياني تصنيفي جديد (أكثر من سلسلتين) يجب إعادة التحقق عبر validate_palette.js قبل
+     استخدام هذه التوكِنز، فالأزرق والبنفسجي متجاوران هنا فشلا فحص CVD (ΔE 0.4 deutan). */
+  --chart-1: #2563eb;
+  --chart-2: #eb6834;
+  --chart-3: #10b981;
+  --chart-4: #7c3aed;
+  --chart-5: #f59e0b;
   --radius: 0.625rem;
 
-  /* Sidebar داكن دائمًا (حتى في الوضع الفاتح) — تباين احترافي كمنصات SaaS العالمية */
-  --sidebar: #1a2233;
-  --sidebar-foreground: #e9e6de;
-  --sidebar-primary: #4a76ab;
+  /* Sidebar داكن دائمًا (حتى في الوضع الفاتح) — قرار بصري من الهوية نفسها (معاينة
+     التطبيق في الصورة المرجعية تُظهر Sidebar داكنًا)، بلون مشتق من --foreground نفسه. */
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #2563eb;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #242e44;
-  --sidebar-accent-foreground: #e9e6de;
-  --sidebar-border: #2b3550;
-  --sidebar-ring: #4a76ab;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #3b82f6;
 }
 
 .dark {
-  --background: #15181c;
-  --foreground: #e9e6de;
-  --card: #1c2025;
-  --card-foreground: #e9e6de;
-  --popover: #1c2025;
-  --popover-foreground: #e9e6de;
-  --primary: #7fa3cf;
-  --primary-foreground: #0e1520;
-  --secondary: #22262c;
-  --secondary-foreground: #e9e6de;
-  --muted: #22262c;
-  --muted-foreground: #a29c8d;
-  --accent: #233246;
-  --accent-foreground: #7fa3cf;
-  --destructive: #ff8a80;
-  --border: #33383f;
-  --input: #33383f;
-  --ring: #7fa3cf;
-  --chart-1: #7fa3cf;
-  --chart-2: #d3a868;
-  --chart-3: #7fbf8f;
-  --chart-4: #4a76ab;
-  --chart-5: #a5722f;
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+  --card: #111827;
+  --card-foreground: #e2e8f0;
+  --popover: #111827;
+  --popover-foreground: #e2e8f0;
+  --primary: #3b82f6;
+  --primary-foreground: #0b1220;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e3a5f;
+  --accent-foreground: #93c5fd;
+  --destructive: #f87171;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #3b82f6;
 
-  --sidebar: #0f131c;
-  --sidebar-foreground: #e9e6de;
-  --sidebar-primary: #7fa3cf;
-  --sidebar-primary-foreground: #0e1520;
-  --sidebar-accent: #1c2536;
-  --sidebar-accent-foreground: #e9e6de;
-  --sidebar-border: #232c40;
-  --sidebar-ring: #7fa3cf;
+  --brand-secondary: #a78bfa;
+  --brand-accent: #22d3ee;
+
+  --success: #34d399;
+  --success-foreground: #052e1f;
+  --warning: #fbbf24;
+  --warning-foreground: #271c02;
+  --error: #f87171;
+  --error-foreground: #2a0a0a;
+  --info: #60a5fa;
+  --info-foreground: #06172f;
+
+  --chart-1: #3b82f6;
+  --chart-2: #f0895a;
+  --chart-3: #34d399;
+  --chart-4: #a78bfa;
+  --chart-5: #fbbf24;
+
+  --sidebar: #060a12;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #060a12;
+  --sidebar-accent: #111827;
+  --sidebar-accent-foreground: #e2e8f0;
+  --sidebar-border: #111827;
+  --sidebar-ring: #3b82f6;
 }
 
 @layer base {

@@ -78,7 +78,7 @@ export default async function StockTakeDetailPage({ params }: { params: Promise<
                       <TableCell
                         className={
                           diff > 0
-                            ? "font-mono tabular-nums text-green-700 dark:text-green-400"
+                            ? "font-mono tabular-nums text-success"
                             : diff < 0
                               ? "font-mono tabular-nums text-destructive"
                               : "font-mono tabular-nums text-muted-foreground"

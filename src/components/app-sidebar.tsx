@@ -37,6 +37,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Logo } from "@/components/brand/Logo";
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; disabled?: boolean };
 
@@ -74,9 +75,7 @@ export function AppSidebar({ companyName }: { companyName: string }) {
     <Sidebar side="right" collapsible="icon">
       <SidebarHeader className="px-3 py-4">
         <div className="flex items-center gap-2 px-1">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary font-mono text-sm font-bold text-sidebar-primary-foreground">
-            م
-          </div>
+          <Logo variant="mark" href={null} size="md" />
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <p className="truncate text-sm font-semibold text-sidebar-foreground">{companyName}</p>
             <p className="font-mono text-[10px] uppercase tracking-widest text-sidebar-foreground/50">

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, Building2, Layers, Receipt, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/brand/Logo";
 import { adminLogoutAction } from "./actions";
 
 const links = [
@@ -23,9 +24,7 @@ export function AdminNav({ adminName }: { adminName: string }) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground">
-              م
-            </div>
+            <Logo variant="mark" href={null} size="sm" />
             <span className="text-sm font-semibold">لوحة إدارة المنصة</span>
           </div>
           <nav className="flex items-center gap-1">

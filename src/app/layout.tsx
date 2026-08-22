@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Arabic, IBM_Plex_Mono } from "next/font/google";
+import { Tajawal, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 
-const plexArabic = IBM_Plex_Sans_Arabic({
-  variable: "--font-plex-arabic",
+const tajawal = Tajawal({
+  variable: "--font-tajawal",
   subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700", "800"],
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ar" dir="rtl" className={cn("h-full", "antialiased", plexArabic.variable, plexMono.variable)}>
+    <html lang="ar" dir="rtl" className={cn("h-full", "antialiased", tajawal.variable, plexMono.variable)}>
       <body className="min-h-full flex flex-col font-sans">
         <TooltipProvider>
           {children}

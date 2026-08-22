@@ -72,7 +72,7 @@ export function CountSheetForm({ stockTakeId, lines }: { stockTakeId: number; li
               <TableCell
                 className={
                   r.diff > 0
-                    ? "font-mono tabular-nums text-green-700 dark:text-green-400"
+                    ? "font-mono tabular-nums text-success"
                     : r.diff < 0
                       ? "font-mono tabular-nums text-destructive"
                       : "font-mono tabular-nums text-muted-foreground"

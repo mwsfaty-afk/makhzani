@@ -95,7 +95,7 @@ export default async function SupplierStatementPage({ params }: { params: Promis
                     <TableCell className="font-mono tabular-nums">
                       {Number(t.debit) > 0 ? t.debit.toString() : "—"}
                     </TableCell>
-                    <TableCell className="font-mono tabular-nums text-green-700 dark:text-green-400">
+                    <TableCell className="font-mono tabular-nums text-success">
                       {Number(t.credit) > 0 ? t.credit.toString() : "—"}
                     </TableCell>
                     <TableCell className="font-mono font-medium tabular-nums">{t.balanceAfter.toString()}</TableCell>
