@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BarcodeScannerButton } from "@/components/barcode-scanner-button";
 import { createItem } from "./actions";
 
 type Option = { id: number; label: string };
@@ -21,6 +22,7 @@ export function ItemForm({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const barcodeRef = useRef<HTMLInputElement>(null);
 
   function handleSubmit(formData: FormData) {
     setError(null);
@@ -38,7 +40,17 @@ export function ItemForm({
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field name="code" label="كود الصنف" required />
-          <Field name="barcode" label="الباركود (اختياري)" />
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="barcode">الباركود (اختياري)</Label>
+            <div className="flex gap-2">
+              <Input id="barcode" name="barcode" ref={barcodeRef} className="flex-1" placeholder="أدخل يدويًا أو امسح بالكاميرا" />
+              <BarcodeScannerButton
+                onScan={(code) => {
+                  if (barcodeRef.current) barcodeRef.current.value = code;
+                }}
+              />
+            </div>
+          </div>
           <Field name="nameAr" label="الاسم بالعربية" required />
           <Field name="name" label="الاسم بالإنجليزية" required />
           <SelectField name="categoryId" label="المجموعة" options={categories} />
