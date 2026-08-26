@@ -124,7 +124,7 @@ export function SaleForm({
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="customerId">العميل</Label>
-            <Select name="customerId" required>
+            <Select name="customerId" required items={customers.map((c) => ({ value: String(c.id), label: c.label }))}>
               <SelectTrigger id="customerId">
                 <SelectValue placeholder="اختر العميل..." />
               </SelectTrigger>
@@ -140,7 +140,7 @@ export function SaleForm({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="warehouseId">المخزن</Label>
-            <Select name="warehouseId" required>
+            <Select name="warehouseId" required items={warehouses.map((w) => ({ value: String(w.id), label: w.label }))}>
               <SelectTrigger id="warehouseId">
                 <SelectValue placeholder="اختر المخزن..." />
               </SelectTrigger>
@@ -187,7 +187,11 @@ export function SaleForm({
               {lines.map((line) => (
                 <TableRow key={line.key}>
                   <TableCell>
-                    <Select value={line.itemId ? String(line.itemId) : undefined} onValueChange={(v) => onSelectItem(line.key, Number(v))}>
+                    <Select
+                      value={line.itemId ? String(line.itemId) : ""}
+                      onValueChange={(v) => onSelectItem(line.key, Number(v))}
+                      items={items.map((i) => ({ value: String(i.id), label: i.label }))}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="اختر صنفًا..." />
                       </SelectTrigger>
@@ -202,8 +206,9 @@ export function SaleForm({
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={line.unitId ? String(line.unitId) : undefined}
+                      value={line.unitId ? String(line.unitId) : ""}
                       onValueChange={(v) => updateLine(line.key, { unitId: Number(v) })}
+                      items={unitOptionsFor(line.itemId).map((u) => ({ value: String(u.id), label: u.label }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="الوحدة" />

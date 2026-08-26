@@ -141,7 +141,7 @@ function SelectField({
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={name}>{label}</Label>
-      <Select name={name} required={required}>
+      <Select name={name} required={required} items={options.map((opt) => ({ value: String(opt.id), label: opt.label }))}>
         <SelectTrigger id={name}>
           <SelectValue placeholder="اختر..." />
         </SelectTrigger>

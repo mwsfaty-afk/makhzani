@@ -60,7 +60,7 @@ export function TransferForm({ warehouses, items }: { warehouses: Option[]; item
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="fromWarehouseId">من مخزن</Label>
-            <Select name="fromWarehouseId" required>
+            <Select name="fromWarehouseId" required items={warehouses.map((w) => ({ value: String(w.id), label: w.label }))}>
               <SelectTrigger id="fromWarehouseId">
                 <SelectValue placeholder="اختر المخزن المصدر..." />
               </SelectTrigger>
@@ -76,7 +76,7 @@ export function TransferForm({ warehouses, items }: { warehouses: Option[]; item
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="toWarehouseId">إلى مخزن</Label>
-            <Select name="toWarehouseId" required>
+            <Select name="toWarehouseId" required items={warehouses.map((w) => ({ value: String(w.id), label: w.label }))}>
               <SelectTrigger id="toWarehouseId">
                 <SelectValue placeholder="اختر المخزن الوجهة..." />
               </SelectTrigger>
@@ -110,8 +110,9 @@ export function TransferForm({ warehouses, items }: { warehouses: Option[]; item
                 <TableRow key={line.key}>
                   <TableCell>
                     <Select
-                      value={line.itemId ? String(line.itemId) : undefined}
+                      value={line.itemId ? String(line.itemId) : ""}
                       onValueChange={(v) => updateLine(line.key, { itemId: Number(v) })}
+                      items={items.map((i) => ({ value: String(i.id), label: i.label }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="اختر صنفًا..." />

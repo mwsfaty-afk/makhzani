@@ -79,7 +79,7 @@ export function StockAdjustmentDialog({ items, warehouses }: { items: Option[]; 
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="itemId">الصنف</Label>
-              <Select name="itemId" required>
+              <Select name="itemId" required items={items.map((item) => ({ value: String(item.id), label: item.label }))}>
                 <SelectTrigger id="itemId">
                   <SelectValue placeholder="اختر الصنف..." />
                 </SelectTrigger>
@@ -95,7 +95,7 @@ export function StockAdjustmentDialog({ items, warehouses }: { items: Option[]; 
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="warehouseId">المخزن</Label>
-              <Select name="warehouseId" required>
+              <Select name="warehouseId" required items={warehouses.map((wh) => ({ value: String(wh.id), label: wh.label }))}>
                 <SelectTrigger id="warehouseId">
                   <SelectValue placeholder="اختر المخزن..." />
                 </SelectTrigger>
@@ -111,7 +111,7 @@ export function StockAdjustmentDialog({ items, warehouses }: { items: Option[]; 
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="reason">السبب</Label>
-              <Select name="reason" required key={direction}>
+              <Select name="reason" required key={direction} items={reasons}>
                 <SelectTrigger id="reason">
                   <SelectValue placeholder="اختر السبب..." />
                 </SelectTrigger>
