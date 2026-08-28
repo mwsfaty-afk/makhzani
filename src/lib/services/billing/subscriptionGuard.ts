@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/db/prisma";
 
 export class SubscriptionExpiredError extends Error {
@@ -13,8 +14,15 @@ const WRITABLE_STATUSES = new Set(["TRIALING", "ACTIVE"]);
  * يجلب اشتراك الشركة، ويُصحّح حالته تلقائيًا (Lazy Expiry) إن تجاوز `currentPeriodEnd`
  * دون انتظار Cron اليومي — بحيث يبقى فرض القراءة فقط/المنع صحيحًا فورًا حتى قبل تشغيل
  * `/api/cron/check-subscriptions` (بند 8.5 في docs/ARCHITECTURE.md).
+ *
+ * ملفوفة بـ React `cache()` — كل كتابة تمر عبر tenantPrisma() تستدعي هذه الدالة (مرة عبر
+ * assertSubscriptionActive، ومرة أخرى عبر enforceCountLimit عند الإنشاء)، وأي عملية حفظ
+ * بعدة أسطر (فاتورة بعدة أصناف) تكرر النداء لكل صف يُكتب. بدون هذا الكاش، كل نداء كان
+ * يعني رحلة إضافية لقاعدة بيانات بعيدة جغرافيًا (Supabase eu-west-1) — قد تتضاعف زمن الحفظ
+ * عدة مرات لفاتورة واحدة. الكاش مؤقت (لعمر الطلب الواحد فقط)، فلا يؤثر على صحة "الانتهاء
+ * الفوري" للاشتراك بين الطلبات.
  */
-export async function getSubscriptionWithPlan(companyId: number) {
+export const getSubscriptionWithPlan = cache(async (companyId: number) => {
   const subscription = await prisma.subscription.findUnique({
     where: { companyId },
     include: { plan: true },
@@ -31,7 +39,7 @@ export async function getSubscriptionWithPlan(companyId: number) {
   }
 
   return subscription;
-}
+});
 
 /** يُستدعى في بداية أي عملية إنشاء/تعديل/اعتماد تمر عبر `prisma.$transaction` الخام
  * (خارج نطاق tenantPrisma()، الذي يفرض هذا الفحص تلقائيًا لكل الكتابات المارة به). */

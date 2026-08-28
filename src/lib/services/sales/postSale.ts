@@ -24,11 +24,17 @@ export async function postSale(companyId: number, saleId: number, userId: number
 
       const company = await tx.company.findUniqueOrThrow({ where: { id: companyId } });
 
+      // جلب كل الأصناف المطلوبة دفعة واحدة بدل استعلام منفصل لكل سطر — راجع نفس الملاحظة
+      // في postPurchase.ts.
+      const itemsById = new Map(
+        (await tx.item.findMany({ where: { id: { in: sale.items.map((l) => l.itemId) } } })).map((i) => [i.id, i]),
+      );
+
       let totalCost = new D(0);
       let totalProfit = new D(0);
 
       for (const line of sale.items) {
-        const item = await tx.item.findUniqueOrThrow({ where: { id: line.itemId } });
+        const item = itemsById.get(line.itemId)!;
         const factor =
           line.unitId === item.salesUnitId
             ? new D(item.salesUnitFactor)

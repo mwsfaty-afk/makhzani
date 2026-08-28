@@ -23,10 +23,17 @@ export async function postPurchase(companyId: number, purchaseId: number, userId
 
       const company = await tx.company.findUniqueOrThrow({ where: { id: companyId } });
 
+      // جلب كل الأصناف المطلوبة دفعة واحدة بدل استعلام منفصل لكل سطر — الحلقة نفسها
+      // (recordStockMovement) لازم تبقى متسلسلة لأنها تقفل صف الرصيد لكل صنف (FOR UPDATE)،
+      // لكن لا داعي أن يتكرر معها استعلام قراءة الصنف الذي لا يعتمد على نتيجة أي سطر آخر.
+      const itemsById = new Map(
+        (await tx.item.findMany({ where: { id: { in: purchase.items.map((l) => l.itemId) } } })).map((i) => [i.id, i]),
+      );
+
       // qty على سطر الفاتورة مُدخلة بوحدة الشراء المختارة (مثلاً "كرتونة") كما تظهر في
       // فاتورة حقيقية — لازم تحويلها لوحدة الصنف الأساسية قبل تسجيلها في محرك المخزون.
       for (const line of purchase.items) {
-        const item = await tx.item.findUniqueOrThrow({ where: { id: line.itemId } });
+        const item = itemsById.get(line.itemId)!;
         const factor =
           line.unitId === item.purchaseUnitId
             ? new D(item.purchaseUnitFactor)
