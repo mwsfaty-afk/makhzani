@@ -98,6 +98,7 @@ export async function deleteTestCompany(companyId: number) {
 
     await tx.documentSequence.deleteMany({ where: { companyId } });
     await tx.setting.deleteMany({ where: { companyId } });
+    await tx.promoCodeRedemption.deleteMany({ where: { companyId } });
 
     await tx.company.delete({ where: { id: companyId } });
   }, { timeout: 20000, maxWait: 10000 });

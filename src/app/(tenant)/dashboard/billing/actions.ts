@@ -1,11 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { requireTenant } from "@/lib/auth/session";
 import { checkPermission } from "@/lib/auth/permissions";
 import { toUserErrorMessage } from "@/lib/errors";
 import { startCheckout } from "@/lib/services/billing/startCheckout";
 import { attachManualPaymentProof, InvalidProofFileError } from "@/lib/services/billing/submitManualProof";
+import { redeemPromoCode } from "@/lib/services/billing/redeemPromoCode";
 
 function baseUrl() {
   return process.env.NEXTAUTH_URL ?? "http://localhost:3000";
@@ -65,4 +67,21 @@ export async function submitManualProofAction(paymentId: number, formData: FormD
   }
 
   redirect("/dashboard/billing?submitted=1");
+}
+
+export async function redeemPromoCodeAction(formData: FormData) {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "settings.edit");
+  if (denied) return denied;
+
+  const code = String(formData.get("code") ?? "").trim();
+  if (!code) return { error: "أدخل الكود الترويجي" };
+
+  try {
+    const { planNameAr } = await redeemPromoCode(ctx.companyId, code);
+    revalidatePath("/dashboard/billing");
+    return { success: true, planNameAr };
+  } catch (err) {
+    return { error: toUserErrorMessage(err, "تعذّر تفعيل الكود") };
+  }
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Building2, Layers, Receipt, Settings } from "lucide-react";
+import { LayoutDashboard, Building2, Layers, Receipt, Settings, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/Logo";
@@ -12,6 +12,7 @@ const links = [
   { href: "/admin/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/admin/companies", label: "الشركات", icon: Building2 },
   { href: "/admin/plans", label: "الخطط", icon: Layers },
+  { href: "/admin/promo-codes", label: "أكواد الخصم", icon: Tag },
   { href: "/admin/payments", label: "المدفوعات", icon: Receipt },
   { href: "/admin/system-settings", label: "إعدادات النظام", icon: Settings },
 ];

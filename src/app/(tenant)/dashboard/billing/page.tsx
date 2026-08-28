@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CheckoutButton } from "./CheckoutButton";
+import { PromoCodeForm } from "./promo-code-form";
 
 const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   TRIALING: { label: "فترة تجريبية", variant: "secondary" },
@@ -113,6 +114,15 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
             <span className="font-medium">{subscription.currentPeriodEnd.toLocaleDateString("ar-EG")}</span>
           </p>
           <p className="font-mono tabular-nums">{fmt(daysLeft)} يوم متبقٍ</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">لديك كود ترويجي؟</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PromoCodeForm />
         </CardContent>
       </Card>
 

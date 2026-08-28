@@ -54,8 +54,8 @@ model PlatformAuditLog {
   id         Int           @id @default(autoincrement())
   adminId    Int
   admin      PlatformAdmin @relation(fields: [adminId], references: [id])
-  action     String // "company.suspend" | "company.activate" | "payment.approve" | "payment.reject" | "plan.update" | "planPrice.upsert" | "planPrice.delete" | "exchangeRate.upsert" | "exchangeRate.delete"
-  targetType String // "company" | "payment" | "plan" | "planPrice" | "exchangeRate"
+  action     String // "company.suspend" | "company.activate" | "payment.approve" | "payment.reject" | "plan.update" | "planPrice.upsert" | "planPrice.delete" | "exchangeRate.upsert" | "exchangeRate.delete" | "promoCode.create" | "promoCode.update"
+  targetType String // "company" | "payment" | "plan" | "planPrice" | "exchangeRate" | "promoCode"
   targetId   Int?
   details    Json?
   createdAt  DateTime      @default(now())
@@ -97,6 +97,38 @@ model Plan {
   subscriptions Subscription[]
   prices        PlanPrice[]
   payments      Payment[]
+  promoCodes    PromoCode[]
+}
+
+// أكواد ترويجية — تفعيل باقة مجانية لمدة محددة، ينشئها الأدمن ويحدد لكل كود حدًا أقصى
+// لعدد مرات الاستخدام. الاستبدال الفعلي عبر redeemPromoCode() (src/lib/services/billing).
+model PromoCode {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  planId         Int
+  plan           Plan      @relation(fields: [planId], references: [id])
+  durationDays   Int
+  maxRedemptions Int
+  redeemedCount  Int       @default(0)
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  redemptions PromoCodeRedemption[]
+}
+
+// شركة واحدة = كود واحد مدى الحياة على مستوى المنصة كلها (@@unique([companyId])) — يمنع
+// تكديس أكواد متعددة على نفس الحساب.
+model PromoCodeRedemption {
+  id          Int       @id @default(autoincrement())
+  promoCodeId Int
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
+  companyId   Int
+  company     Company   @relation(fields: [companyId], references: [id])
+  redeemedAt  DateTime  @default(now())
+
+  @@unique([companyId])
 }
 
 // سعر الخطة لكل دولة مستهدفة — بديل عن price/currency الافتراضيين أعلاه عند وجود سطر مطابق
@@ -247,6 +279,7 @@ model Company {
   documentSequences DocumentSequence[]
   auditLogs         AuditLog[]
   notifications     Notification[]
+  promoCodeRedemptions PromoCodeRedemption[]
 }
 
 // ============================================================================

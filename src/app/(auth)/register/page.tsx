@@ -42,11 +42,12 @@ export default function RegisterPage() {
     if (!state.success || !submittedCredentials.current || signedIn.current) return;
     signedIn.current = true;
     toast.success("تم إنشاء الحساب بنجاح — جارٍ تسجيل الدخول...");
+    if (state.promoWarning) toast.warning(state.promoWarning);
     const { email, password } = submittedCredentials.current;
     signIn("credentials", { email, password, redirect: false }).then((res) => {
       if (res?.ok) router.push("/dashboard");
     });
-  }, [state.success, router]);
+  }, [state.success, state.promoWarning, router]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-8 p-6">
@@ -91,6 +92,8 @@ export default function RegisterPage() {
 
               <Field label="كلمة المرور" name="password" type="password" required minLength={8} />
             </div>
+
+            <Field label="كود ترويجي (اختياري)" name="promoCode" />
 
             {state.error && (
               <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.error}</p>
