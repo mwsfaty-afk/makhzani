@@ -223,6 +223,10 @@ model Company {
   logoUrl            String?
   status             CompanyStatus @default(ACTIVE)
   allowNegativeStock Boolean       @default(false)
+  taxEnabled         Boolean       @default(false)
+  defaultTaxRate     Decimal       @default(0) @db.Decimal(5, 2)
+  salesEnabled       Boolean       @default(true)
+  purchasesEnabled   Boolean       @default(true)
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 

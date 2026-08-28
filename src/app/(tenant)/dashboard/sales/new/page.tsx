@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { requireTenant } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/prisma";
 import { Button } from "@/components/ui/button";
 import { SaleForm } from "./sale-form";
 
 export default async function NewSalePage() {
-  const { db } = await requireTenant();
+  const { db, companyId } = await requireTenant();
 
-  const [customers, warehouses, items] = await Promise.all([
+  const [customers, warehouses, items, company] = await Promise.all([
     db.customer.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     db.warehouse.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     db.item.findMany({
@@ -15,6 +16,7 @@ export default async function NewSalePage() {
       include: { baseUnit: true, salesUnit: true },
       orderBy: { nameAr: "asc" },
     }),
+    prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { taxEnabled: true } }),
   ]);
 
   if (customers.length === 0) {
@@ -57,7 +59,9 @@ export default async function NewSalePage() {
           salesUnitLabel: i.salesUnit?.nameAr ?? null,
           salesUnitFactor: Number(i.salesUnitFactor),
           salePrice: Number(i.salePrice),
+          taxRate: Number(i.taxRate),
         }))}
+        taxEnabled={company.taxEnabled}
       />
     </div>
   );

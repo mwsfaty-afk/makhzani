@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TaxSettingsForm } from "./tax-settings-form";
+import { ModuleSettingsForm } from "./module-settings-form";
 
 const COUNTRY_LABELS: Record<string, string> = { SA: "السعودية", EG: "مصر" };
 
@@ -44,6 +46,24 @@ export default async function SettingsPage() {
           <Row label="العملة" value={`${company.currency}${company.currencySymbol ? ` (${company.currencySymbol})` : ""}`} />
           <Row label="نوع النشاط" value={company.businessType ?? "—"} />
           <Row label="تاريخ التسجيل" value={company.createdAt.toLocaleDateString("ar-EG")} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">الضريبة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TaxSettingsForm initialEnabled={company.taxEnabled} initialRate={Number(company.defaultTaxRate)} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">الوحدات المفعّلة</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ModuleSettingsForm initialSales={company.salesEnabled} initialPurchases={company.purchasesEnabled} />
         </CardContent>
       </Card>
 

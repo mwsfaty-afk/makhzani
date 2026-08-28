@@ -20,6 +20,7 @@ type ItemOption = {
   salesUnitLabel: string | null;
   salesUnitFactor: number;
   salePrice: number;
+  taxRate: number;
 };
 
 type Line = {
@@ -41,10 +42,12 @@ export function SaleForm({
   customers,
   warehouses,
   items,
+  taxEnabled,
 }: {
   customers: Option[];
   warehouses: Option[];
   items: ItemOption[];
+  taxEnabled: boolean;
 }) {
   const [lines, setLines] = useState<Line[]>([emptyLine()]);
   const [pending, startTransition] = useTransition();
@@ -61,7 +64,12 @@ export function SaleForm({
     if (!item) return;
     const unitId = item.salesUnitId ?? item.baseUnitId;
     const factor = unitId === item.salesUnitId ? item.salesUnitFactor : 1;
-    updateLine(key, { itemId, unitId, unitPrice: String(item.salePrice * factor) });
+    updateLine(key, {
+      itemId,
+      unitId,
+      unitPrice: String(item.salePrice * factor),
+      ...(taxEnabled ? { taxRate: String(item.taxRate) } : {}),
+    });
   }
 
   function unitOptionsFor(itemId: number | null): Option[] {
@@ -179,7 +187,7 @@ export function SaleForm({
                 <TableHead className="w-24">الكمية</TableHead>
                 <TableHead className="w-28">سعر الوحدة</TableHead>
                 <TableHead className="w-24">خصم</TableHead>
-                <TableHead className="w-20">ضريبة %</TableHead>
+                {taxEnabled && <TableHead className="w-20">ضريبة %</TableHead>}
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -246,14 +254,16 @@ export function SaleForm({
                       onChange={(e) => updateLine(line.key, { discount: e.target.value })}
                     />
                   </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={line.taxRate}
-                      onChange={(e) => updateLine(line.key, { taxRate: e.target.value })}
-                    />
-                  </TableCell>
+                  {taxEnabled && (
+                    <TableCell>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={line.taxRate}
+                        onChange={(e) => updateLine(line.key, { taxRate: e.target.value })}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Button
                       type="button"

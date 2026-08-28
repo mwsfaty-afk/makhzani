@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { requireTenant } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/prisma";
 import { Button } from "@/components/ui/button";
 import { PurchaseForm } from "./purchase-form";
 
 export default async function NewPurchasePage() {
-  const { db } = await requireTenant();
+  const { db, companyId } = await requireTenant();
 
-  const [suppliers, warehouses, items] = await Promise.all([
+  const [suppliers, warehouses, items, company] = await Promise.all([
     db.supplier.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     db.warehouse.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
     db.item.findMany({
@@ -15,6 +16,7 @@ export default async function NewPurchasePage() {
       include: { baseUnit: true, purchaseUnit: true },
       orderBy: { nameAr: "asc" },
     }),
+    prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { taxEnabled: true } }),
   ]);
 
   if (suppliers.length === 0) {
@@ -57,7 +59,9 @@ export default async function NewPurchasePage() {
           purchaseUnitLabel: i.purchaseUnit?.nameAr ?? null,
           purchaseUnitFactor: Number(i.purchaseUnitFactor),
           purchasePrice: Number(i.purchasePrice),
+          taxRate: Number(i.taxRate),
         }))}
+        taxEnabled={company.taxEnabled}
       />
     </div>
   );

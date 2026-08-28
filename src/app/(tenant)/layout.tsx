@@ -24,7 +24,10 @@ export default async function TenantLayout({ children }: { children: React.React
 
   return (
     <SidebarProvider>
-      <AppSidebar companyName={company?.name ?? ""} />
+      <AppSidebar
+        companyName={company?.name ?? ""}
+        enabledModules={{ sales: company?.salesEnabled ?? true, purchases: company?.purchasesEnabled ?? true }}
+      />
       <SidebarInset>
         <Topbar
           userName={session.user.name ?? ""}

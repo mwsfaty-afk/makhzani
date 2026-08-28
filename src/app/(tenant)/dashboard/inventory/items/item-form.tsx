@@ -15,10 +15,14 @@ export function ItemForm({
   categories,
   brands,
   units,
+  taxEnabled,
+  defaultTaxRate,
 }: {
   categories: Option[];
   brands: Option[];
   units: Option[];
+  taxEnabled: boolean;
+  defaultTaxRate: number;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -73,12 +77,20 @@ export function ItemForm({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">التسعير والضريبة</CardTitle>
+          <CardTitle className="text-base">{taxEnabled ? "التسعير والضريبة" : "التسعير"}</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <CardContent className={`grid grid-cols-1 gap-4 ${taxEnabled ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
           <Field name="purchasePrice" label="سعر الشراء" type="number" step="0.0001" />
           <Field name="salePrice" label="سعر البيع" type="number" step="0.0001" />
-          <Field name="taxRate" label="نسبة الضريبة %" type="number" step="0.01" />
+          {taxEnabled && (
+            <Field
+              name="taxRate"
+              label="نسبة الضريبة %"
+              type="number"
+              step="0.01"
+              defaultValue={String(defaultTaxRate)}
+            />
+          )}
         </CardContent>
       </Card>
 

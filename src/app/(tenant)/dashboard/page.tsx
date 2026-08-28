@@ -1,10 +1,12 @@
+import Link from "next/link";
 import { requireTenant } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { getDashboardData } from "@/lib/services/reports/getDashboardData";
+import { getInventoryOverview } from "@/lib/services/inventory/getInventoryOverview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronLeft, TrendingUp, TrendingDown } from "lucide-react";
 import { SalesPurchasesChart } from "./sales-purchases-chart";
 
 function fmt(n: number) {
@@ -14,11 +16,12 @@ function fmt(n: number) {
 export default async function DashboardPage() {
   const { db, companyId, session } = await requireTenant();
 
-  const [company, teamMembers, subscription, data] = await Promise.all([
+  const [company, teamMembers, subscription, data, inventory] = await Promise.all([
     prisma.company.findUnique({ where: { id: companyId } }),
     db.user.findMany({ orderBy: { createdAt: "asc" }, include: { role: true } }),
     prisma.subscription.findUnique({ where: { companyId }, include: { plan: true } }),
     getDashboardData(companyId),
+    getInventoryOverview(companyId),
   ]);
 
   const now = new Date();
@@ -44,47 +47,39 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        <Kpi label="مبيعات اليوم" value={fmt(data.sales.today)} />
-        <Kpi label="مبيعات الأسبوع" value={fmt(data.sales.week)} />
-        <Kpi
-          label="مبيعات الشهر"
-          value={fmt(data.sales.month)}
-          trend={monthChangePercent}
-        />
-        <Kpi label="مشتريات الشهر" value={fmt(data.purchases.month)} />
-        <Kpi label="ربح الشهر" value={fmt(data.profitMonth)} highlight />
-        <Kpi label="قيمة المخزون" value={fmt(data.inventory.value)} />
-        <Kpi label="رصيد الخزينة" value={fmt(data.cashTotal)} />
-        <Kpi label="عدد الأصناف" value={fmt(data.inventory.itemCount)} />
-        <Kpi label="مديونية العملاء" value={fmt(data.customerDebtTotal)} />
-        <Kpi label="مستحق للموردين" value={fmt(data.supplierDebtTotal)} />
-      </div>
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">نظرة عامة على المخزون</h2>
+          <Link
+            href="/dashboard/inventory"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            عرض التفاصيل الكاملة
+            <ChevronLeft className="size-4" />
+          </Link>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">المبيعات والمشتريات — آخر 14 يومًا</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesPurchasesChart data={data.trend} />
-        </CardContent>
-      </Card>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Kpi label="عدد الأصناف" value={fmt(inventory.itemCount)} />
+          <Kpi label="قيمة المخزون" value={fmt(inventory.totalValue)} highlight />
+          <Kpi label="تنبيهات المخزون" value={fmt(inventory.lowStockCount + inventory.deadStockCount)} />
+          <Kpi label="حركات اليوم" value={fmt(inventory.todayMovementCount)} />
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">أعلى الموردين (هذا الشهر)</CardTitle>
+            <CardTitle className="text-base">توزيع القيمة على المخازن</CardTitle>
           </CardHeader>
           <CardContent>
-            {data.topSuppliers.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">لا توجد مشتريات هذا الشهر بعد</p>
+            {inventory.warehouseBreakdown.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">لا توجد أرصدة مخزون بعد</p>
             ) : (
               <Table>
                 <TableBody>
-                  {data.topSuppliers.map((s, i) => (
+                  {inventory.warehouseBreakdown.slice(0, 4).map((w, i) => (
                     <TableRow key={i}>
-                      <TableCell className="font-medium">{s.name}</TableCell>
-                      <TableCell className="font-mono tabular-nums">{fmt(s.total)}</TableCell>
+                      <TableCell className="font-medium">{w.name}</TableCell>
+                      <TableCell className="font-mono tabular-nums">{fmt(w.value)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -92,38 +87,90 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-bold">المبيعات والمشتريات</h2>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <Kpi label="مبيعات اليوم" value={fmt(data.sales.today)} />
+          <Kpi label="مبيعات الأسبوع" value={fmt(data.sales.week)} />
+          <Kpi
+            label="مبيعات الشهر"
+            value={fmt(data.sales.month)}
+            trend={monthChangePercent}
+          />
+          <Kpi label="مشتريات الشهر" value={fmt(data.purchases.month)} />
+          <Kpi label="ربح الشهر" value={fmt(data.profitMonth)} highlight />
+          <Kpi label="رصيد الخزينة" value={fmt(data.cashTotal)} />
+          <Kpi label="مديونية العملاء" value={fmt(data.customerDebtTotal)} />
+          <Kpi label="مستحق للموردين" value={fmt(data.supplierDebtTotal)} />
+        </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">أعضاء الفريق ({teamMembers.length})</CardTitle>
+            <CardTitle className="text-base">المبيعات والمشتريات — آخر 14 يومًا</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الاسم</TableHead>
-                  <TableHead>الدور</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {teamMembers.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">
-                      {member.name}
-                      {member.isOwner && (
-                        <Badge variant="outline" className="ms-2">
-                          مالك
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{member.role?.name ?? "—"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <SalesPurchasesChart data={data.trend} />
           </CardContent>
         </Card>
-      </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">أعلى الموردين (هذا الشهر)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data.topSuppliers.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">لا توجد مشتريات هذا الشهر بعد</p>
+              ) : (
+                <Table>
+                  <TableBody>
+                    {data.topSuppliers.map((s, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium">{s.name}</TableCell>
+                        <TableCell className="font-mono tabular-nums">{fmt(s.total)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">أعضاء الفريق ({teamMembers.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>الاسم</TableHead>
+                    <TableHead>الدور</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamMembers.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">
+                        {member.name}
+                        {member.isOwner && (
+                          <Badge variant="outline" className="ms-2">
+                            مالك
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{member.role?.name ?? "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }

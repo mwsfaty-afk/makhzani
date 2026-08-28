@@ -39,7 +39,13 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/brand/Logo";
 
-type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; disabled?: boolean };
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  disabled?: boolean;
+  module?: "sales" | "purchases";
+};
 
 const inventoryLinks: NavItem[] = [
   { href: "/dashboard/inventory/stock", label: "أرصدة المخزون", icon: ClipboardList },
@@ -55,8 +61,8 @@ const inventoryLinks: NavItem[] = [
 
 const mainLinks: NavItem[] = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-  { href: "/dashboard/sales", label: "المبيعات", icon: ShoppingCart },
-  { href: "/dashboard/purchases", label: "المشتريات", icon: Truck },
+  { href: "/dashboard/sales", label: "المبيعات", icon: ShoppingCart, module: "sales" },
+  { href: "/dashboard/purchases", label: "المشتريات", icon: Truck, module: "purchases" },
 ];
 
 const bottomLinks: NavItem[] = [
@@ -68,8 +74,15 @@ const bottomLinks: NavItem[] = [
   { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
 ];
 
-export function AppSidebar({ companyName }: { companyName: string }) {
+export function AppSidebar({
+  companyName,
+  enabledModules,
+}: {
+  companyName: string;
+  enabledModules: { sales: boolean; purchases: boolean };
+}) {
   const pathname = usePathname();
+  const visibleMainLinks = mainLinks.filter((item) => !item.module || enabledModules[item.module]);
 
   return (
     <Sidebar side="right" collapsible="icon">
@@ -89,7 +102,7 @@ export function AppSidebar({ companyName }: { companyName: string }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainLinks.map((item) => (
+              {visibleMainLinks.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     render={<Link href={item.disabled ? "#" : item.href} />}

@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { requireTenant } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/prisma";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { ItemForm } from "../item-form";
 
 export default async function NewItemPage() {
-  const { db } = await requireTenant();
+  const { db, companyId } = await requireTenant();
 
-  const [categories, brands, units] = await Promise.all([
+  const [categories, brands, units, company] = await Promise.all([
     db.category.findMany({ orderBy: { name: "asc" } }),
     db.brand.findMany({ orderBy: { name: "asc" } }),
     db.unit.findMany({ orderBy: { nameAr: "asc" } }),
+    prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { taxEnabled: true, defaultTaxRate: true } }),
   ]);
 
   if (units.length === 0) {
@@ -39,6 +41,8 @@ export default async function NewItemPage() {
         categories={categories.map((c) => ({ id: c.id, label: c.name }))}
         brands={brands.map((b) => ({ id: b.id, label: b.name }))}
         units={units.map((u) => ({ id: u.id, label: u.nameAr }))}
+        taxEnabled={company.taxEnabled}
+        defaultTaxRate={Number(company.defaultTaxRate)}
       />
     </div>
   );
