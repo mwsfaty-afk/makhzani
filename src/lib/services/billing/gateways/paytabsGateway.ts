@@ -20,6 +20,18 @@ function appBaseUrl() {
   return process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 }
 
+/**
+ * حساب PayTabs الحالي (منطقة مصر) لا يقبل إلا الجنيه المصري — أي عملة أخرى (SAR...) تُرفَض
+ * من PayTabs نفسها بخطأ "Currency not available". قرار المستخدم الصريح: العميل غير المصري
+ * يدفع بنفس *الرقم* المعروض له بعملته (مثلًا 50) لكن بعملة جنيه مصري حرفيًا (50 EGP وليس
+ * ما يعادل 50 SAR فعليًا) — وليس تحويلًا فعليًا للقيمة. سجل الدفعة في قاعدة البيانات
+ * (`Payment.amount`/`currency`) يبقى بعملة الشركة الأصلية دون تغيير؛ هذا الاستبدال يخص فقط
+ * الطلب المُرسَل لـPayTabs.
+ */
+function paytabsCurrency(currency: string): string {
+  return currency === "EGP" ? currency : "EGP";
+}
+
 export const paytabsGateway: PaymentGateway = {
   code: "paytabs",
 
@@ -38,7 +50,7 @@ export const paytabsGateway: PaymentGateway = {
         tran_class: "ecom",
         cart_id: String(ctx.payment.id),
         cart_description: `Makhzani — ${ctx.plan.nameAr} (${ctx.company.name})`,
-        cart_currency: ctx.payment.currency,
+        cart_currency: paytabsCurrency(ctx.payment.currency),
         cart_amount: Number(ctx.payment.amount),
         callback: callbackUrl,
         return: returnUrl,
