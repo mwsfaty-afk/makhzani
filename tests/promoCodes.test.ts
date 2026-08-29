@@ -36,10 +36,11 @@ describe("Promo codes", () => {
   afterAll(async () => {
     await prisma.promoCodeRedemption.deleteMany({ where: { promoCodeId: promoId } });
     await prisma.promoCode.delete({ where: { id: promoId } });
-    await deleteTestCompany(companyAId);
-    await deleteTestCompany(companyBId);
-    await deleteTestCompany(companyCId);
-  });
+    // الشركات الثلاث مستقلة تمامًا (بلا صفوف مشتركة) — الحذف المتوازي يقلل زمن التنظيف
+    // من ~3× مدة معاملة واحدة (قد يتجاوز مهلة الـhook الافتراضية 45 ثانية عبر اتصال
+    // Supabase البعيد) إلى مدة معاملة واحدة تقريبًا.
+    await Promise.all([deleteTestCompany(companyAId), deleteTestCompany(companyBId), deleteTestCompany(companyCId)]);
+  }, 90000);
 
   it("rejects a code that doesn't exist", async () => {
     await expect(redeemPromoCode(companyAId, "NOPE-DOES-NOT-EXIST")).rejects.toThrow(PromoCodeInvalidError);

@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { getPublicPlans } from "@/lib/services/marketing/getPublicPlans";
 
 /** يجلب الخطط الحقيقية من نفس مصدر البيانات المستخدم في لوحة الفوترة ولوحة الأدمن —
- * أي تغيير سعر/حد من `/admin/plans` ينعكس هنا تلقائيًا، بدون أي نسخة ثانية من البيانات. */
+ * أي تغيير سعر/حد من `/admin/plans` ينعكس هنا تلقائيًا، بدون أي نسخة ثانية من البيانات.
+ *
+ * العملة المعروضة تُحدَّد تلقائيًا من دولة الزائر عبر هيدر `x-vercel-ip-country` (تضيفه
+ * شبكة Vercel لكل طلب دون أي إعداد إضافي) — السعودية تشاهد السعر بالريال، وأي دولة أخرى
+ * (أو حين لا يتوفر الهيدر، كما في التطوير المحلي) تشاهده بالجنيه المصري افتراضيًا. */
 export async function Pricing() {
-  const plans = await getPublicPlans();
+  const countryCode = (await headers()).get("x-vercel-ip-country") === "SA" ? "SA" : "EG";
+  const plans = await getPublicPlans(countryCode);
 
   if (plans.length === 0) return null;
 
@@ -13,7 +19,7 @@ export async function Pricing() {
       <div className="mx-auto mb-14 max-w-2xl text-center">
         <h2 className="text-3xl font-bold text-balance sm:text-4xl">باقات تناسب حجم عملك</h2>
         <p className="mt-4 text-lg text-muted-foreground text-pretty">
-          الأسعار موضّحة بالريال السعودي. ابدأ بفترة تجريبية مجانية، وترقَّ متى احتجت لحدود أكبر.
+          ابدأ بفترة تجريبية مجانية، وترقَّ متى احتجت لحدود أكبر.
         </p>
       </div>
 

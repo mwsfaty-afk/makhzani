@@ -1,15 +1,15 @@
 import { prisma } from "@/lib/db/prisma";
 
-/** الدولة المرجعية لعرض الأسعار العامة في الصفحة الرئيسية (السعودية أولًا حسب استهداف
- * السوق، docs/ARCHITECTURE.md §8.2) — نفس مصدر الحقيقة المستخدم في `/dashboard/billing`
- * و`/admin/plans`، وليس نسخة ثانية من بيانات الأسعار. */
-const REFERENCE_COUNTRY = "SA";
+/** الدولة الافتراضية لعرض الأسعار العامة حين لا يمكن تحديد دولة الزائر (خارج Vercel، أو
+ * الهيدر غير متاح) — مصر حسب سعر الخطة الأساسي (EGP، docs/ARCHITECTURE.md §8.2). الدولة
+ * الفعلية تُمرَّر من المستدعي (Pricing.tsx) بناءً على هيدر `x-vercel-ip-country`. */
+const DEFAULT_COUNTRY = "EG";
 
-export async function getPublicPlans() {
+export async function getPublicPlans(countryCode: string = DEFAULT_COUNTRY) {
   const plans = await prisma.plan.findMany({
     where: { isPublic: true, isActive: true, isTrial: false },
     orderBy: { sortOrder: "asc" },
-    include: { prices: { where: { countryCode: REFERENCE_COUNTRY } } },
+    include: { prices: { where: { countryCode } } },
   });
 
   return plans.map((plan) => {
