@@ -24,7 +24,7 @@ export function gatewayLabel(code: string): string {
 /** كل طرق الدفع المعروضة للعميل — التلقائية أولًا ثم اليدوية، وفي بيئة التطوير فقط
  * تُضاف طريقة وهمية للاختبار السريع دون بيانات دفع حقيقية. */
 export function listAvailableGatewayCodes(): string[] {
-  const codes = ["paypal", ...MANUAL_METHOD_CODES];
+  const codes = ["paytabs", "paypal", ...MANUAL_METHOD_CODES];
   if (process.env.NODE_ENV !== "production") codes.push("mock");
   return codes;
 }

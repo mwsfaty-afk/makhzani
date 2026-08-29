@@ -22,7 +22,12 @@ export async function startCheckoutAction(planId: number, gatewayCode: string) {
   const { companyId } = ctx;
 
   const isPaypal = gatewayCode === "paypal";
-  const returnUrl = isPaypal ? `${baseUrl()}/api/billing/paypal/return` : `${baseUrl()}/dashboard/billing`;
+  const isPaytabs = gatewayCode === "paytabs";
+  const returnUrl = isPaypal
+    ? `${baseUrl()}/api/billing/paypal/return`
+    : isPaytabs
+      ? `${baseUrl()}/api/billing/paytabs/return`
+      : `${baseUrl()}/dashboard/billing`;
   const cancelUrl = isPaypal ? `${baseUrl()}/api/billing/paypal/cancel` : `${baseUrl()}/dashboard/billing`;
 
   let outcome: Awaited<ReturnType<typeof startCheckout>>;
