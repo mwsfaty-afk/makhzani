@@ -21,3 +21,28 @@ export async function getApproxConversionNote(fromCurrency: string, toCurrency: 
   if (!rate) return null;
   return `≈ ${Number(rate.rate).toLocaleString("ar")} ${toCurrency}`;
 }
+
+/**
+ * سعر صرف رقمي خام بين عملتين — استثناء مقصود من قاعدة "العرض فقط" أعلاه، بطلب صريح من
+ * المستخدم: بوابة PayTabs (paytabsGateway.ts) لا تقبل حاليًا إلا الجنيه المصري، فأي شركة
+ * بعملة أخرى (SAR...) تحتاج تحويلًا فعليًا لمبلغ الفوترة الحقيقي (وليس مجرد استبدال رمز
+ * العملة بنفس الرقم). يبحث عن السطر بالاتجاه المباشر (from→to) أولًا، ثم بالاتجاه العكسي
+ * (to→from، مقلوبًا) إن لم يوجد — الأدمن قد يُدخل السعر بأي من الاتجاهين من
+ * `/admin/system-settings`. يُعيد null إن لم يوجد أي سعر محفوظ إطلاقًا (المستدعي يجب أن
+ * يرفض العملية بوضوح، لا أن يخمّن رقمًا).
+ */
+export async function getConversionRate(fromCurrency: string, toCurrency: string): Promise<number | null> {
+  if (fromCurrency === toCurrency) return 1;
+
+  const direct = await prisma.exchangeRateNote.findUnique({
+    where: { baseCurrency_targetCurrency: { baseCurrency: fromCurrency, targetCurrency: toCurrency } },
+  });
+  if (direct) return Number(direct.rate);
+
+  const inverse = await prisma.exchangeRateNote.findUnique({
+    where: { baseCurrency_targetCurrency: { baseCurrency: toCurrency, targetCurrency: fromCurrency } },
+  });
+  if (inverse) return 1 / Number(inverse.rate);
+
+  return null;
+}

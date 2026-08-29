@@ -1,10 +1,21 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { PaymentGateway, CheckoutContext, CheckoutResult } from "./types";
+import { getConversionRate } from "../pricing";
 
 export class PayTabsNotConfiguredError extends Error {
   constructor() {
     super("بوابة PayTabs غير مُهيأة بعد — يلزم ضبط PAYTABS_SERVER_KEY وPAYTABS_PROFILE_ID وPAYTABS_BASE_URL في إعدادات النشر.");
     this.name = "PayTabsNotConfiguredError";
+  }
+}
+
+export class PayTabsExchangeRateMissingError extends Error {
+  constructor(fromCurrency: string) {
+    super(
+      `حساب PayTabs يقبل الجنيه المصري فقط، ولا يوجد سعر صرف محفوظ من ${fromCurrency} إلى EGP — ` +
+        `أضِفه أولًا من لوحة الأدمن (الإعدادات العامة → أسعار الصرف) قبل قبول الدفع بهذه العملة.`,
+    );
+    this.name = "PayTabsExchangeRateMissingError";
   }
 }
 
@@ -22,14 +33,20 @@ function appBaseUrl() {
 
 /**
  * حساب PayTabs الحالي (منطقة مصر) لا يقبل إلا الجنيه المصري — أي عملة أخرى (SAR...) تُرفَض
- * من PayTabs نفسها بخطأ "Currency not available". قرار المستخدم الصريح: العميل غير المصري
- * يدفع بنفس *الرقم* المعروض له بعملته (مثلًا 50) لكن بعملة جنيه مصري حرفيًا (50 EGP وليس
- * ما يعادل 50 SAR فعليًا) — وليس تحويلًا فعليًا للقيمة. سجل الدفعة في قاعدة البيانات
- * (`Payment.amount`/`currency`) يبقى بعملة الشركة الأصلية دون تغيير؛ هذا الاستبدال يخص فقط
- * الطلب المُرسَل لـPayTabs.
+ * من PayTabs نفسها بخطأ "Currency not available". يُحوَّل المبلغ فعليًا بسعر صرف حقيقي
+ * (وليس مجرد استبدال رمز العملة بنفس الرقم — عميل سعودي يدفع ما يعادل مبلغه بالريال فعلًا
+ * بالجنيه المصري، بقرار صريح من المستخدم). سعر الصرف يُقرأ من `ExchangeRateNote` عبر
+ * `getConversionRate()` — إن لم يوجد سعر محفوظ، تُرفَض العملية بوضوح بدل تخمين رقم. سجل
+ * الدفعة في قاعدة البيانات (`Payment.amount`/`currency`) يبقى بعملة الشركة الأصلية دون
+ * تغيير؛ التحويل يخص فقط المبلغ الفعلي المُرسَل لـPayTabs.
  */
-function paytabsCurrency(currency: string): string {
-  return currency === "EGP" ? currency : "EGP";
+async function toPaytabsAmount(amount: number, currency: string): Promise<{ amount: number; currency: string }> {
+  if (currency === "EGP") return { amount, currency };
+
+  const rate = await getConversionRate(currency, "EGP");
+  if (rate === null) throw new PayTabsExchangeRateMissingError(currency);
+
+  return { amount: Number((amount * rate).toFixed(2)), currency: "EGP" };
 }
 
 export const paytabsGateway: PaymentGateway = {
@@ -40,6 +57,10 @@ export const paytabsGateway: PaymentGateway = {
 
     const returnUrl = `${ctx.returnUrl}${ctx.returnUrl.includes("?") ? "&" : "?"}paymentId=${ctx.payment.id}`;
     const callbackUrl = `${appBaseUrl()}/api/billing/paytabs/callback`;
+    const { amount: cartAmount, currency: cartCurrency } = await toPaytabsAmount(
+      Number(ctx.payment.amount),
+      ctx.payment.currency,
+    );
 
     const res = await fetch(`${paytabsBaseUrl}/payment/request`, {
       method: "POST",
@@ -50,8 +71,8 @@ export const paytabsGateway: PaymentGateway = {
         tran_class: "ecom",
         cart_id: String(ctx.payment.id),
         cart_description: `Makhzani — ${ctx.plan.nameAr} (${ctx.company.name})`,
-        cart_currency: paytabsCurrency(ctx.payment.currency),
-        cart_amount: Number(ctx.payment.amount),
+        cart_currency: cartCurrency,
+        cart_amount: cartAmount,
         callback: callbackUrl,
         return: returnUrl,
         hide_shipping: true,
