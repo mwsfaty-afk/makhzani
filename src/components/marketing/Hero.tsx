@@ -20,7 +20,7 @@ export function Hero({ trialDays }: { trialDays: number | null }) {
           <p className="max-w-lg text-lg leading-relaxed text-muted-foreground text-pretty">
             مخزني منصة عربية لإدارة المخزون والمبيعات والمشتريات والعملاء والموردين
             والتقارير — مبنية خصيصًا للشركات الصغيرة والمتوسطة، بصلاحيات دقيقة لكل موظف
-            وعزل كامل لبيانات كل شركة.
+            وحماية كاملة لخصوصية بياناتك.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row">
