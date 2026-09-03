@@ -53,6 +53,8 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                 <TableRow>
                   <TableHead>الشركة</TableHead>
                   <TableHead>المالك</TableHead>
+                  <TableHead>البريد الإلكتروني</TableHead>
+                  <TableHead>الهاتف</TableHead>
                   <TableHead>الدولة</TableHead>
                   <TableHead>المستخدمون</TableHead>
                   <TableHead>الخطة</TableHead>
@@ -71,6 +73,8 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                         </Link>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{c.ownerName}</TableCell>
+                      <TableCell className="text-muted-foreground" dir="ltr">{c.email}</TableCell>
+                      <TableCell className="text-muted-foreground" dir="ltr">{c.phone ?? "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{c.country}</TableCell>
                       <TableCell className="font-mono tabular-nums">{c._count.users}</TableCell>
                       <TableCell>{c.subscription?.plan.nameAr ?? "—"}</TableCell>

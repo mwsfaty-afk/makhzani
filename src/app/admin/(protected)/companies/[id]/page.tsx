@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CompanyStatusControl } from "./CompanyStatusControl";
+import { ExtendSubscriptionControl } from "./ExtendSubscriptionControl";
+import { CompanyContactForm } from "./CompanyContactForm";
+import { ResetPasswordControl } from "./ResetPasswordControl";
 
 const COMPANY_STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   ACTIVE: { label: "نشطة", variant: "default" },
@@ -70,12 +73,22 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
           <CardHeader>
             <CardTitle className="text-base">بيانات الشركة</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">الدولة</span><span>{company.country}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">العملة</span><span>{company.currency}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">النشاط</span><span>{company.businessType ?? "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">الهاتف</span><span dir="ltr">{company.phone ?? "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">تاريخ التسجيل</span><span>{company.createdAt.toLocaleDateString("ar-EG")}</span></div>
+          <CardContent className="flex flex-col gap-4 text-sm">
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between"><span className="text-muted-foreground">الدولة</span><span>{company.country}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">العملة</span><span>{company.currency}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">النشاط</span><span>{company.businessType ?? "—"}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">تاريخ التسجيل</span><span>{company.createdAt.toLocaleDateString("ar-EG")}</span></div>
+            </div>
+
+            <div className="border-t border-border pt-3">
+              <CompanyContactForm companyId={company.id} initialEmail={company.email} initialPhone={company.phone} />
+            </div>
+
+            <div className="border-t border-border pt-3">
+              <p className="mb-2 text-xs text-muted-foreground">دعم فني — لحساب فقد المستخدم الوصول إليه</p>
+              <ResetPasswordControl companyId={company.id} />
+            </div>
           </CardContent>
         </Card>
 
@@ -83,13 +96,16 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
           <CardHeader>
             <CardTitle className="text-base">الاشتراك</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2 text-sm">
+          <CardContent className="flex flex-col gap-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">الخطة</span><span>{company.subscription?.plan.nameAr ?? "—"}</span></div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">الحالة</span>
               {subStatus && <Badge variant={subStatus.variant}>{subStatus.label}</Badge>}
             </div>
             <div className="flex justify-between"><span className="text-muted-foreground">ينتهي في</span><span>{company.subscription?.currentPeriodEnd.toLocaleDateString("ar-EG") ?? "—"}</span></div>
+            <div className="border-t border-border pt-3">
+              <ExtendSubscriptionControl companyId={company.id} />
+            </div>
           </CardContent>
         </Card>
       </div>

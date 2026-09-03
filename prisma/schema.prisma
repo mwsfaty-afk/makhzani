@@ -54,7 +54,7 @@ model PlatformAuditLog {
   id         Int           @id @default(autoincrement())
   adminId    Int
   admin      PlatformAdmin @relation(fields: [adminId], references: [id])
-  action     String // "company.suspend" | "company.activate" | "payment.approve" | "payment.reject" | "plan.update" | "planPrice.upsert" | "planPrice.delete" | "exchangeRate.upsert" | "exchangeRate.delete" | "promoCode.create" | "promoCode.update"
+  action     String // "company.suspend" | "company.activate" | "payment.approve" | "payment.reject" | "plan.update" | "planPrice.upsert" | "planPrice.delete" | "exchangeRate.upsert" | "exchangeRate.delete" | "promoCode.create" | "promoCode.update" | "company.extendSubscription" | "company.updateContact" | "company.resetOwnerPassword"
   targetType String // "company" | "payment" | "plan" | "planPrice" | "exchangeRate" | "promoCode"
   targetId   Int?
   details    Json?
