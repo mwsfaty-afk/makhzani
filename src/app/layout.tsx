@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { WhatsAppSupportButton } from "@/components/WhatsAppSupportButton";
 
 const tajawal = Tajawal({
   variable: "--font-tajawal",
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col font-sans">
         <TooltipProvider>
           {children}
+          <WhatsAppSupportButton />
           <Toaster position="top-center" richColors dir="rtl" />
         </TooltipProvider>
       </body>
