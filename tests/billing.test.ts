@@ -188,21 +188,32 @@ describe("Subscriptions, plan limits, and payment states", () => {
   });
 
   it("PayPal checkout without configured credentials fails cleanly and leaves the payment FAILED, not dangling PENDING", async () => {
-    const basicPlan = await prisma.plan.findUniqueOrThrow({ where: { code: "basic" } });
-    await expect(
-      startCheckout({
-        companyId,
-        planId: basicPlan.id,
-        gatewayCode: "paypal",
-        returnUrl: "http://localhost/api/billing/paypal/return",
-        cancelUrl: "http://localhost/api/billing/paypal/cancel",
-      }),
-    ).rejects.toThrow();
+    const originalId = process.env.PAYPAL_CLIENT_ID;
+    const originalSecret = process.env.PAYPAL_CLIENT_SECRET;
+    delete process.env.PAYPAL_CLIENT_ID;
+    delete process.env.PAYPAL_CLIENT_SECRET;
+    try {
+      const basicPlan = await prisma.plan.findUniqueOrThrow({ where: { code: "basic" } });
+      await expect(
+        startCheckout({
+          companyId,
+          planId: basicPlan.id,
+          gatewayCode: "paypal",
+          returnUrl: "http://localhost/api/billing/paypal/return",
+          cancelUrl: "http://localhost/api/billing/paypal/cancel",
+        }),
+      ).rejects.toThrow();
 
-    const lastPaypalPayment = await prisma.payment.findFirstOrThrow({
-      where: { companyId, gateway: "paypal" },
-      orderBy: { id: "desc" },
-    });
-    expect(lastPaypalPayment.status).toBe("FAILED");
+      const lastPaypalPayment = await prisma.payment.findFirstOrThrow({
+        where: { companyId, gateway: "paypal" },
+        orderBy: { id: "desc" },
+      });
+      expect(lastPaypalPayment.status).toBe("FAILED");
+    } finally {
+      if (originalId === undefined) delete process.env.PAYPAL_CLIENT_ID;
+      else process.env.PAYPAL_CLIENT_ID = originalId;
+      if (originalSecret === undefined) delete process.env.PAYPAL_CLIENT_SECRET;
+      else process.env.PAYPAL_CLIENT_SECRET = originalSecret;
+    }
   });
 });

@@ -1,4 +1,5 @@
 import type { PaymentGateway, CheckoutContext, CheckoutResult } from "./types";
+import { getConversionRate } from "../pricing";
 
 const PAYPAL_API_BASE =
   process.env.PAYPAL_ENV === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
@@ -7,6 +8,16 @@ export class PayPalNotConfiguredError extends Error {
   constructor() {
     super("بوابة PayPal غير مُهيأة بعد — يلزم ضبط PAYPAL_CLIENT_ID وPAYPAL_CLIENT_SECRET في إعدادات النشر.");
     this.name = "PayPalNotConfiguredError";
+  }
+}
+
+export class PayPalExchangeRateMissingError extends Error {
+  constructor(fromCurrency: string) {
+    super(
+      `PayPal لا يدعم عملة ${fromCurrency} مباشرة، ولا يوجد سعر صرف محفوظ من ${fromCurrency} إلى USD — ` +
+        `أضِفه أولًا من لوحة الأدمن (الإعدادات العامة → أسعار الصرف) قبل قبول الدفع بهذه العملة.`,
+    );
+    this.name = "PayPalExchangeRateMissingError";
   }
 }
 
@@ -32,10 +43,26 @@ async function getAccessToken(): Promise<string> {
   return data.access_token as string;
 }
 
-/** يحوّل عملة الخطة إلى ما يقبله PayPal — PayPal لا يدعم بعض العملات المحلية مباشرة
- * (مثل الجنيه المصري)، فتُستخدم USD كبديل في هذه الحالات فقط لغرض الدفع عبر PayPal
- * تحديدًا؛ سجل الدفعة والاشتراك يبقيان بعملة الخطة الأصلية دائمًا للعرض والفوترة. */
-const PAYPAL_UNSUPPORTED_CURRENCIES = new Set(["EGP"]);
+/** القائمة الكاملة الرسمية لعملات PayPal المدعومة (developer.paypal.com/reference/currency-codes)
+ * — لا تتضمن SAR ولا EGP، عملتَي السوقين المستهدفين لهذا المشروع، فكلاهما يحتاج تحويلًا. */
+const PAYPAL_SUPPORTED_CURRENCIES = new Set([
+  "AUD", "BRL", "CAD", "CNY", "CZK", "DKK", "EUR", "HKD", "HUF", "ILS", "JPY", "MYR",
+  "MXN", "TWD", "NZD", "NOK", "PHP", "PLN", "GBP", "SGD", "SEK", "CHF", "THB", "USD",
+]);
+
+/** يحوّل مبلغ الدفعة الفعلي (وليس رمز العملة فقط) إلى الدولار حين تكون عملة الشركة غير
+ * مدعومة مباشرة من PayPal — نفس مبدأ toPaytabsAmount في paytabsGateway.ts، وبنفس دالة
+ * سعر الصرف الحقيقي (getConversionRate). سجل الدفعة في قاعدة البيانات
+ * (`Payment.amount`/`currency`) يبقى بعملة الشركة الأصلية دون تغيير؛ التحويل يخص فقط
+ * المبلغ الفعلي المُرسَل لـPayPal. */
+async function toPaypalAmount(amount: number, currency: string): Promise<{ amount: number; currency: string }> {
+  if (PAYPAL_SUPPORTED_CURRENCIES.has(currency)) return { amount, currency };
+
+  const rate = await getConversionRate(currency, "USD");
+  if (rate === null) throw new PayPalExchangeRateMissingError(currency);
+
+  return { amount: Number((amount * rate).toFixed(2)), currency: "USD" };
+}
 
 export const paypalGateway: PaymentGateway = {
   code: "paypal",
@@ -43,8 +70,8 @@ export const paypalGateway: PaymentGateway = {
   async createCheckout(ctx: CheckoutContext): Promise<CheckoutResult> {
     const accessToken = await getAccessToken();
 
-    const currency = PAYPAL_UNSUPPORTED_CURRENCIES.has(ctx.payment.currency) ? "USD" : ctx.payment.currency;
-    const amount = Number(ctx.payment.amount).toFixed(2);
+    const { amount: convertedAmount, currency } = await toPaypalAmount(Number(ctx.payment.amount), ctx.payment.currency);
+    const amount = convertedAmount.toFixed(2);
 
     const returnUrl = `${ctx.returnUrl}${ctx.returnUrl.includes("?") ? "&" : "?"}paymentId=${ctx.payment.id}`;
     const cancelUrl = `${ctx.cancelUrl}${ctx.cancelUrl.includes("?") ? "&" : "?"}paymentId=${ctx.payment.id}`;
