@@ -37,8 +37,19 @@ export function MarketingFooter() {
         </div>
       </div>
 
-      <div className="border-t border-border px-4 py-5 text-center text-xs text-muted-foreground sm:px-6">
-        © {new Date().getFullYear()} مخزني. جميع الحقوق محفوظة.
+      <div className="flex flex-col items-center gap-1.5 border-t border-border px-4 py-5 text-center text-xs text-muted-foreground sm:px-6">
+        <p>© {new Date().getFullYear()} مخزني. جميع الحقوق محفوظة.</p>
+        <p>
+          تمت البرمجة والتصميم بواسطة{" "}
+          <a
+            href="https://www.gafar.net"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground hover:text-primary hover:underline"
+          >
+            شركة جعفر.نت
+          </a>
+        </p>
       </div>
     </footer>
   );
