@@ -105,6 +105,10 @@ export async function updateCompanyContactAction(
     await prisma.$transaction([
       prisma.company.update({ where: { id: companyId }, data: { email, phone } }),
       prisma.user.update({ where: { id: owner.id }, data: { email, phone } }),
+      // نفس منطق مسح محاولات الدخول الفاشلة في resetCompanyOwnerPasswordAction — عميل قد
+      // يكون جرّب الدخول بالبريد الجديد الصحيح (لكن بكلمة مرور خاطئة) عدة مرات قبل أن
+      // يكتشف أن المشكلة كانت في البريد المسجَّل أصلًا، فيبقى محظورًا رغم تصحيح البريد الآن.
+      prisma.loginAttempt.deleteMany({ where: { identifier: email } }),
     ]);
   } catch (err) {
     return { error: toUserErrorMessage(err, "تعذّر تحديث بيانات التواصل") };
@@ -125,7 +129,13 @@ export async function updateCompanyContactAction(
 
 /** يعيد تعيين كلمة مرور مالك حساب شركة إلى كلمة عشوائية مؤقتة، ويُعيدها **مرة واحدة فقط**
  * في استجابة هذا الفعل لعرضها للأدمن (لإبلاغ العميل بها يدويًا) — لا تُخزَّن ولا تُسجَّل في
- * سجل التدقيق نصًا صريحًا بأي شكل، فقط الـhash الفعلي في User.passwordHash. */
+ * سجل التدقيق نصًا صريحًا بأي شكل، فقط الـhash الفعلي في User.passwordHash.
+ *
+ * يمسح أيضًا محاولات الدخول الفاشلة المسجَّلة لهذا البريد (assertNotRateLimited في
+ * rateLimit.ts يمنع الدخول بعد 5 محاولات فاشلة خلال 15 دقيقة) — بدون هذا، عميل حاول عدة
+ * مرات بكلمة مروره القديمة المنسية قبل التواصل مع الدعم يبقى محظورًا حتى بعد الحصول على
+ * كلمة مرور صحيحة جديدة، ورسالة الدخول العامة "بيانات الدخول غير صحيحة" لا تميّز هذه
+ * الحالة عن كلمة مرور خاطئة فعليًا — إعادة التعيين يجب أن تمنح بداية نظيفة حقًا. */
 export async function resetCompanyOwnerPasswordAction(
   companyId: number,
 ): Promise<{ error: string } | { success: true; tempPassword: string; ownerEmail: string }> {
@@ -137,7 +147,10 @@ export async function resetCompanyOwnerPasswordAction(
   const tempPassword = randomBytes(9).toString("base64url"); // 12 حرفًا تقريبًا، عشوائي حقيقي
   const passwordHash = await bcrypt.hash(tempPassword, 12);
 
-  await prisma.user.update({ where: { id: owner.id }, data: { passwordHash } });
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: owner.id }, data: { passwordHash } }),
+    prisma.loginAttempt.deleteMany({ where: { identifier: owner.email } }),
+  ]);
 
   await logAdminAction({
     adminId: admin.id,
