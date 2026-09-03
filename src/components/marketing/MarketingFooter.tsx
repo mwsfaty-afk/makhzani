@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Logo } from "@/components/brand/Logo";
 
 const NAV_LINKS = [
@@ -6,6 +7,13 @@ const NAV_LINKS = [
   { href: "#how-it-works", label: "كيف يعمل" },
   { href: "#pricing", label: "الباقات" },
   { href: "#faq", label: "الأسئلة الشائعة" },
+];
+
+const PAYMENT_LOGOS = [
+  { src: "/payment-logos/visa.svg", alt: "Visa", width: 52, height: 17 },
+  { src: "/payment-logos/paypal.png", alt: "PayPal", width: 74, height: 20 },
+  { src: "/payment-logos/vodafone-cash.svg", alt: "Vodafone Cash", width: 28, height: 28 },
+  { src: "/payment-logos/al-rajhi.svg", alt: "مصرف الراجحي", width: 60, height: 21 },
 ];
 
 export function MarketingFooter() {
@@ -34,6 +42,17 @@ export function MarketingFooter() {
           <Link href="/register" className="rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90">
             ابدأ مجانًا
           </Link>
+        </div>
+      </div>
+
+      <div className="border-t border-border px-4 py-6 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3">
+          <p className="text-xs text-muted-foreground">طرق دفع آمنة وموثوقة</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 opacity-80">
+            {PAYMENT_LOGOS.map((logo) => (
+              <Image key={logo.alt} src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} className="h-auto max-h-6 w-auto" />
+            ))}
+          </div>
         </div>
       </div>
 
