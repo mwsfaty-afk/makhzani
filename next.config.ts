@@ -2,6 +2,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false, // يخفي ترويسة X-Powered-By: Next.js (تسريب معلومات بسيط عن التقنية المستخدمة)
+  async redirects() {
+    // نطاق Vercel الافتراضي (*.vercel.app) يبقى شغالًا دائمًا بجانب أي دومين مخصَّص يُضاف
+    // للمشروع — لا يتوقف ولا يتحول تلقائيًا. تحويل 301 هنا يمنع ظهور الموقع بنطاقين مختلفين
+    // (محتوى مكرر يشتت قوة الترتيب في محركات البحث بين الرابطين) ويوجّه أي زائر بالرابط
+    // القديم للهوية الرسمية الجديدة mkhzny.com.
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "makhzani-sa.vercel.app" }],
+        destination: "https://mkhzny.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   experimental: {
     serverActions: {
       // إثبات الدفع (صورة/PDF) محدود بـ 5 ميجابايت في submitManualProof.ts — الحد الافتراضي
