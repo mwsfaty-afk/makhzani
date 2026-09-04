@@ -14,7 +14,7 @@ export function Hero({ trialDays }: { trialDays: number | null }) {
           )}
 
           <h1 className="text-4xl font-bold leading-[1.2] text-balance sm:text-5xl">
-            نظام إدارة مخزونك ومبيعاتك <span className="text-primary">بذكاء</span>، من مكان واحد
+            نظام إدارة المخازن والمستودعات <span className="text-primary">بذكاء</span>، من مكان واحد
           </h1>
 
           <p className="max-w-lg text-lg leading-relaxed text-muted-foreground text-pretty">
