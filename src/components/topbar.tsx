@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,18 +12,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SignOutMenuItem } from "@/components/SignOutButton";
+import { NotificationsBell } from "@/components/NotificationsBell";
+
+type NotificationRow = {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  link: string | null;
+  isRead: boolean;
+  createdAt: Date;
+};
 
 export function Topbar({
   userName,
   roleName,
   subscriptionLabel,
+  notifications,
+  unreadCount,
 }: {
   userName: string;
   roleName: string | null;
   subscriptionLabel: string;
+  notifications: NotificationRow[];
+  unreadCount: number;
 }) {
   const initial = userName.trim().charAt(0).toUpperCase();
 
@@ -37,14 +51,7 @@ export function Topbar({
       </div>
 
       <div className="flex items-center gap-2">
-        <Tooltip>
-          <TooltipTrigger
-            render={<Button variant="ghost" size="icon" className="text-muted-foreground" disabled aria-label="الإشعارات (قريبًا)" />}
-          >
-            <Bell className="size-4" />
-          </TooltipTrigger>
-          <TooltipContent>الإشعارات — قريبًا</TooltipContent>
-        </Tooltip>
+        <NotificationsBell notifications={notifications} unreadCount={unreadCount} />
 
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="ghost" className="flex items-center gap-2 px-2" />}>
