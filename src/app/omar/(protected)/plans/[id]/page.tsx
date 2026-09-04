@@ -23,7 +23,7 @@ export default async function AdminPlanDetailPage({ params }: { params: Promise<
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
-      <Link href="/admin/plans" className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/omar/plans" className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ChevronRight className="size-4" />
         الخطط
       </Link>

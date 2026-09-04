@@ -34,5 +34,5 @@ export async function adminLoginAction(formData: FormData) {
   await prisma.platformAdmin.update({ where: { id: admin!.id }, data: { lastLoginAt: new Date() } });
   await createAdminSession(admin!.id);
 
-  redirect("/admin/dashboard");
+  redirect("/omar/dashboard");
 }

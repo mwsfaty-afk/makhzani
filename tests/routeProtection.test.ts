@@ -3,7 +3,7 @@ import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 
 /**
  * اختبار حقيقي على مستوى HTTP فوق التطبيق المبني فعليًا (`next start`) — وليس فحصًا على
- * مستوى الكود فقط. هذا يثبت أن حماية `/admin/**` و`/dashboard/**` تتم من الخادم نفسه (عبر
+ * مستوى الكود فقط. هذا يثبت أن حماية `/omar/**` و`/dashboard/**` تتم من الخادم نفسه (عبر
  * `requirePlatformAdmin()`/`requireTenant()` في الـ layout/page)، وليست مجرد إخفاء أزرار في
  * الواجهة — طلب مباشر بلا كوكيز جلسة يجب أن يُعاد توجيهه دائمًا، مهما كان الرابط.
  */
@@ -50,23 +50,23 @@ describe("Server-side route protection (HTTP-level, not just UI hiding)", () => 
     await new Promise((r) => setTimeout(r, 500));
   });
 
-  it("GET /admin/dashboard with no session cookie redirects to /admin/login, never renders admin content", async () => {
-    const res = await fetch(`${BASE_URL}/admin/dashboard`, { redirect: "manual" });
+  it("GET /omar/dashboard with no session cookie redirects to /omar/login, never renders admin content", async () => {
+    const res = await fetch(`${BASE_URL}/omar/dashboard`, { redirect: "manual" });
     expect([302, 307, 303]).toContain(res.status);
     const location = res.headers.get("location") ?? "";
-    expect(location).toContain("/admin/login");
+    expect(location).toContain("/omar/login");
   });
 
-  it("GET /admin/companies with no session cookie redirects to /admin/login", async () => {
-    const res = await fetch(`${BASE_URL}/admin/companies`, { redirect: "manual" });
+  it("GET /omar/companies with no session cookie redirects to /omar/login", async () => {
+    const res = await fetch(`${BASE_URL}/omar/companies`, { redirect: "manual" });
     expect([302, 307, 303]).toContain(res.status);
-    expect(res.headers.get("location") ?? "").toContain("/admin/login");
+    expect(res.headers.get("location") ?? "").toContain("/omar/login");
   });
 
-  it("GET /admin/plans with no session cookie redirects to /admin/login", async () => {
-    const res = await fetch(`${BASE_URL}/admin/plans`, { redirect: "manual" });
+  it("GET /omar/plans with no session cookie redirects to /omar/login", async () => {
+    const res = await fetch(`${BASE_URL}/omar/plans`, { redirect: "manual" });
     expect([302, 307, 303]).toContain(res.status);
-    expect(res.headers.get("location") ?? "").toContain("/admin/login");
+    expect(res.headers.get("location") ?? "").toContain("/omar/login");
   });
 
   it("GET /dashboard with no tenant session cookie redirects to /login", async () => {

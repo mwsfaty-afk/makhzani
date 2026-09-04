@@ -44,8 +44,8 @@ export async function createPromoCodeAction(formData: FormData) {
 
   await logAdminAction({ adminId: admin.id, action: "promoCode.create", targetType: "promoCode", targetId: promoId, details: d });
 
-  revalidatePath("/admin/promo-codes");
-  redirect(`/admin/promo-codes/${promoId}`);
+  revalidatePath("/omar/promo-codes");
+  redirect(`/omar/promo-codes/${promoId}`);
 }
 
 const updateSchema = z.object({
@@ -75,7 +75,7 @@ export async function updatePromoCodeAction(
     },
   });
 
-  revalidatePath(`/admin/promo-codes/${promoId}`);
-  revalidatePath("/admin/promo-codes");
+  revalidatePath(`/omar/promo-codes/${promoId}`);
+  revalidatePath("/omar/promo-codes");
   return { success: true };
 }

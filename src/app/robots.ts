@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       // لوحات التطبيق الموثَّق دخولها لا تخص محركات البحث — لا فائدة تسويقية من فهرستها،
       // وقد تحمل عناوين URL بمعرّفات داخلية (شركات/فواتير) لا يجب أن تظهر في نتائج البحث.
-      disallow: ["/dashboard", "/dashboard/*", "/admin", "/admin/*", "/api/*"],
+      disallow: ["/dashboard", "/dashboard/*", "/omar", "/omar/*", "/api/*"],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };

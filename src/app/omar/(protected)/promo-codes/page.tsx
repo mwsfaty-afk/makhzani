@@ -13,7 +13,7 @@ export default async function AdminPromoCodesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">أكواد الخصم</h1>
-        <Button render={<Link href="/admin/promo-codes/new" />} size="sm">
+        <Button render={<Link href="/omar/promo-codes/new" />} size="sm">
           <Plus />
           كود جديد
         </Button>
@@ -46,7 +46,7 @@ export default async function AdminPromoCodesPage() {
                 codes.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-mono font-medium">
-                      <Link href={`/admin/promo-codes/${c.id}`} className="hover:underline">
+                      <Link href={`/omar/promo-codes/${c.id}`} className="hover:underline">
                         {c.code}
                       </Link>
                     </TableCell>

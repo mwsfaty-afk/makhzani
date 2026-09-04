@@ -9,12 +9,12 @@ import { Logo } from "@/components/brand/Logo";
 import { adminLogoutAction } from "./actions";
 
 const links = [
-  { href: "/admin/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-  { href: "/admin/companies", label: "الشركات", icon: Building2 },
-  { href: "/admin/plans", label: "الخطط", icon: Layers },
-  { href: "/admin/promo-codes", label: "أكواد الخصم", icon: Tag },
-  { href: "/admin/payments", label: "المدفوعات", icon: Receipt },
-  { href: "/admin/system-settings", label: "إعدادات النظام", icon: Settings },
+  { href: "/omar/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
+  { href: "/omar/companies", label: "الشركات", icon: Building2 },
+  { href: "/omar/plans", label: "الخطط", icon: Layers },
+  { href: "/omar/promo-codes", label: "أكواد الخصم", icon: Tag },
+  { href: "/omar/payments", label: "المدفوعات", icon: Receipt },
+  { href: "/omar/system-settings", label: "إعدادات النظام", icon: Settings },
 ];
 
 export function AdminNav({ adminName }: { adminName: string }) {

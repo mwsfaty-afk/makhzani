@@ -32,7 +32,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
         ].map((f) => (
           <Link
             key={f.label}
-            href={f.value ? `/admin/companies?status=${f.value}` : "/admin/companies"}
+            href={f.value ? `/omar/companies?status=${f.value}` : "/omar/companies"}
             className={`rounded-md px-3 py-1.5 ${status === f.value || (!status && !f.value) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"}`}
           >
             {f.label}
@@ -68,7 +68,7 @@ export default async function AdminCompaniesPage({ searchParams }: { searchParam
                   return (
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">
-                        <Link href={`/admin/companies/${c.id}`} className="hover:underline">
+                        <Link href={`/omar/companies/${c.id}`} className="hover:underline">
                           {c.name}
                         </Link>
                       </TableCell>

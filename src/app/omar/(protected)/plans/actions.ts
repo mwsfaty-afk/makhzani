@@ -54,8 +54,8 @@ export async function updatePlanAction(planId: number, formData: FormData) {
     },
   });
 
-  revalidatePath(`/admin/plans/${planId}`);
-  revalidatePath("/admin/plans");
+  revalidatePath(`/omar/plans/${planId}`);
+  revalidatePath("/omar/plans");
   return { success: true };
 }
 
@@ -80,7 +80,7 @@ export async function upsertPlanPriceAction(planId: number, formData: FormData) 
 
   await logAdminAction({ adminId: admin.id, action: "planPrice.upsert", targetType: "plan", targetId: planId, details: d });
 
-  revalidatePath(`/admin/plans/${planId}`);
+  revalidatePath(`/omar/plans/${planId}`);
   return { success: true };
 }
 
@@ -92,6 +92,6 @@ export async function deletePlanPriceAction(planId: number, planPriceId: number)
 
   await prisma.planPrice.delete({ where: { id: planPriceId } });
   await logAdminAction({ adminId: admin.id, action: "planPrice.delete", targetType: "plan", targetId: planId, details: { planPriceId } });
-  revalidatePath(`/admin/plans/${planId}`);
+  revalidatePath(`/omar/plans/${planId}`);
   return { success: true };
 }

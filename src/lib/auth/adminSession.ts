@@ -37,19 +37,19 @@ export async function requirePlatformAdmin() {
   const secret = process.env.NEXTAUTH_SECRET;
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token || !secret) redirect("/admin/login");
+  if (!token || !secret) redirect("/omar/login");
 
   let adminId: number | undefined;
   try {
     const decoded = await decode({ token: token!, secret: secret! });
     adminId = (decoded as { adminId?: number } | null)?.adminId;
   } catch {
-    redirect("/admin/login");
+    redirect("/omar/login");
   }
-  if (!adminId) redirect("/admin/login");
+  if (!adminId) redirect("/omar/login");
 
   const admin = await prisma.platformAdmin.findUnique({ where: { id: adminId } });
-  if (!admin || !admin.isActive) redirect("/admin/login");
+  if (!admin || !admin.isActive) redirect("/omar/login");
 
   return admin;
 }

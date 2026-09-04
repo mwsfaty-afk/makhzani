@@ -32,7 +32,7 @@ export default async function AdminPlansPage() {
               {plans.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">
-                    <Link href={`/admin/plans/${p.id}`} className="hover:underline">
+                    <Link href={`/omar/plans/${p.id}`} className="hover:underline">
                       {p.nameAr}
                     </Link>
                     <span className="ms-2 font-mono text-xs text-muted-foreground">{p.code}</span>

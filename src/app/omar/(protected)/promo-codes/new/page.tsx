@@ -9,7 +9,7 @@ export default async function NewPromoCodePage() {
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-4">
-      <Link href="/admin/promo-codes" className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/omar/promo-codes" className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ChevronRight className="size-4" />
         أكواد الخصم
       </Link>

@@ -38,7 +38,7 @@ export async function upsertExchangeRateAction(formData: FormData) {
     details: { baseCurrency, targetCurrency, rate: d.rate },
   });
 
-  revalidatePath("/admin/system-settings");
+  revalidatePath("/omar/system-settings");
   return { success: true };
 }
 
@@ -46,6 +46,6 @@ export async function deleteExchangeRateAction(id: number) {
   const admin = await requirePlatformAdmin();
   await prisma.exchangeRateNote.delete({ where: { id } });
   await logAdminAction({ adminId: admin.id, action: "exchangeRate.delete", targetType: "exchangeRate", targetId: id });
-  revalidatePath("/admin/system-settings");
+  revalidatePath("/omar/system-settings");
   return { success: true };
 }

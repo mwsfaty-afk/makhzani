@@ -456,15 +456,18 @@ Vercel Cron يومي (`/api/cron/check-subscriptions`) يفحص كل الاشت�
 /settings/{company,users,roles,warehouses,numbering,notifications,subscription}
 ```
 
-### ب) لوحة إدارة المنصة `/admin/...`
+### ب) لوحة إدارة المنصة `/omar/...`
+
+مسار غير قياسي (وليس `/admin`) عمدًا — إخفاء بسيط عن الزحف الآلي/المسح التلقائي لروابط
+الأدمن الشائعة، وليس بديلًا عن المصادقة الحقيقية (`requirePlatformAdmin()`).
 
 ```
-/admin/login
-/admin/dashboard
-/admin/companies       /admin/companies/:id
-/admin/plans           /admin/plans/:id
-/admin/payments
-/admin/system-settings
+/omar/login
+/omar/dashboard
+/omar/companies       /omar/companies/:id
+/omar/plans           /omar/plans/:id
+/omar/payments
+/omar/system-settings
 ```
 
 ### تخطيط الواجهة العام

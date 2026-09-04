@@ -28,7 +28,7 @@ export async function getApproxConversionNote(fromCurrency: string, toCurrency: 
  * بعملة أخرى (SAR...) تحتاج تحويلًا فعليًا لمبلغ الفوترة الحقيقي (وليس مجرد استبدال رمز
  * العملة بنفس الرقم). يبحث عن السطر بالاتجاه المباشر (from→to) أولًا، ثم بالاتجاه العكسي
  * (to→from، مقلوبًا) إن لم يوجد — الأدمن قد يُدخل السعر بأي من الاتجاهين من
- * `/admin/system-settings`. يُعيد null إن لم يوجد أي سعر محفوظ إطلاقًا (المستدعي يجب أن
+ * `/omar/system-settings`. يُعيد null إن لم يوجد أي سعر محفوظ إطلاقًا (المستدعي يجب أن
  * يرفض العملية بوضوح، لا أن يخمّن رقمًا).
  */
 export async function getConversionRate(fromCurrency: string, toCurrency: string): Promise<number | null> {

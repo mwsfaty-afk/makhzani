@@ -14,7 +14,7 @@ export async function approvePaymentAction(paymentId: number) {
     return { error: toUserErrorMessage(err, "تعذّرت الموافقة على الدفعة") };
   }
   await logAdminAction({ adminId: admin.id, action: "payment.approve", targetType: "payment", targetId: paymentId });
-  revalidatePath("/admin/payments");
+  revalidatePath("/omar/payments");
   return { success: true };
 }
 
@@ -29,6 +29,6 @@ export async function rejectPaymentAction(paymentId: number, formData: FormData)
     return { error: toUserErrorMessage(err, "تعذّر رفض الدفعة") };
   }
   await logAdminAction({ adminId: admin.id, action: "payment.reject", targetType: "payment", targetId: paymentId, details: { reason } });
-  revalidatePath("/admin/payments");
+  revalidatePath("/omar/payments");
   return { success: true };
 }

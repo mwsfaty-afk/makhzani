@@ -56,7 +56,7 @@ export default async function AdminDashboardPage() {
       {data.pendingPaymentsCount > 0 && (
         <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
           يوجد {fmt(data.pendingPaymentsCount)} دفعة بانتظار المراجعة —{" "}
-          <Link href="/admin/payments" className="font-medium text-primary underline">
+          <Link href="/omar/payments" className="font-medium text-primary underline">
             مراجعتها الآن
           </Link>
         </div>
@@ -85,7 +85,7 @@ export default async function AdminDashboardPage() {
                 return (
                   <TableRow key={c.id}>
                     <TableCell className="font-medium">
-                      <Link href={`/admin/companies/${c.id}`} className="hover:underline">
+                      <Link href={`/omar/companies/${c.id}`} className="hover:underline">
                         {c.name}
                       </Link>
                     </TableCell>

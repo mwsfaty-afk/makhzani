@@ -52,7 +52,7 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/admin/companies" className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/omar/companies" className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ChevronRight className="size-4" />
         الشركات
       </Link>

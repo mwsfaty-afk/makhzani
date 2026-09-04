@@ -29,9 +29,9 @@ export async function setCompanyStatusAction(companyId: number, status: string) 
     details: { fromStatus: before?.status, toStatus: status },
   });
 
-  revalidatePath(`/admin/companies/${companyId}`);
-  revalidatePath("/admin/companies");
-  revalidatePath("/admin/dashboard");
+  revalidatePath(`/omar/companies/${companyId}`);
+  revalidatePath("/omar/companies");
+  revalidatePath("/omar/dashboard");
   return { success: true };
 }
 
@@ -68,7 +68,7 @@ export async function extendSubscriptionAction(
     details: { days, previousPeriodEnd: subscription.currentPeriodEnd, newPeriodEnd },
   });
 
-  revalidatePath(`/admin/companies/${companyId}`);
+  revalidatePath(`/omar/companies/${companyId}`);
   return { success: true, newPeriodEnd };
 }
 
@@ -122,8 +122,8 @@ export async function updateCompanyContactAction(
     details: { newEmail: email, newPhone: phone },
   });
 
-  revalidatePath(`/admin/companies/${companyId}`);
-  revalidatePath("/admin/companies");
+  revalidatePath(`/omar/companies/${companyId}`);
+  revalidatePath("/omar/companies");
   return { success: true };
 }
 
