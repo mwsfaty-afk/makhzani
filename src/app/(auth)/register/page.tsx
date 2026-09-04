@@ -102,6 +102,18 @@ export default function RegisterPage() {
             <Button type="submit" disabled={pending} className="mt-2 w-full">
               {pending ? "جارٍ الإنشاء..." : "إنشاء الحساب"}
             </Button>
+
+            <p className="text-center text-xs text-muted-foreground">
+              بإنشاء الحساب، أنت توافق على{" "}
+              <Link href="/terms" className="underline hover:text-foreground">
+                شروط الاستخدام
+              </Link>{" "}
+              و
+              <Link href="/privacy" className="underline hover:text-foreground">
+                سياسة الخصوصية
+              </Link>
+              .
+            </p>
           </form>
         </CardContent>
       </Card>

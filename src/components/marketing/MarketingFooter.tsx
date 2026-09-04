@@ -9,6 +9,12 @@ const NAV_LINKS = [
   { href: "#faq", label: "الأسئلة الشائعة" },
 ];
 
+const LEGAL_LINKS = [
+  { href: "/terms", label: "شروط الاستخدام" },
+  { href: "/privacy", label: "سياسة الخصوصية" },
+  { href: "/refund-policy", label: "سياسة الاسترجاع" },
+];
+
 const PAYMENT_LOGOS = [
   { src: "/payment-logos/visa.svg", alt: "Visa", width: 52, height: 17 },
   { src: "/payment-logos/paypal.png", alt: "PayPal", width: 74, height: 20 },
@@ -57,6 +63,13 @@ export function MarketingFooter() {
       </div>
 
       <div className="flex flex-col items-center gap-1.5 border-t border-border px-4 py-5 text-center text-xs text-muted-foreground sm:px-6">
+        <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          {LEGAL_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="hover:text-foreground hover:underline">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
         <p>© {new Date().getFullYear()} مخزني. جميع الحقوق محفوظة.</p>
         <p>
           تمت البرمجة والتصميم بواسطة{" "}

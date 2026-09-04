@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     default: "مخزني — نظام إدارة المخزون والمبيعات والمشتريات",
     template: "%s | مخزني",
   },
-  description: "نظام SaaS لإدارة المخازن والمبيعات والمشتريات",
+  description: "منصة عربية لإدارة المخازن والمبيعات والمشتريات والعملاء والموردين من لوحة تحكم واحدة.",
   robots: { index: true, follow: true },
 };
 
