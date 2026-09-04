@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Tajawal, IBM_Plex_Mono } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   return (
     <html lang="ar" dir="rtl" className={cn("h-full", "antialiased", tajawal.variable, plexMono.variable)}>
       <body className="min-h-full flex flex-col font-sans">
@@ -38,6 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Toaster position="top-center" richColors dir="rtl" />
         </TooltipProvider>
       </body>
+      {gaId && <GoogleAnalytics gaId={gaId} />}
     </html>
   );
 }

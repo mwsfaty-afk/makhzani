@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@next/third-parties": "^16.3.4",
     "@prisma/client": "^6.19.3",
     "@sentry/nextjs": "^10.73.0",
     "@zxing/browser": "^0.2.1",

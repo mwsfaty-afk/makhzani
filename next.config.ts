@@ -26,13 +26,16 @@ const nextConfig: NextConfig = {
   async headers() {
     // CSP معتدلة عمدًا (unsafe-inline/unsafe-eval) — Next.js/Tailwind/Base UI تحتاجها
     // في وضعها الحالي بدون nonce مخصص؛ تشديدها لاحقًا خطوة منفصلة تحتاج اختبارًا موسّعًا.
+    // نطاقا googletagmanager.com وgoogle-analytics.com مضافان لـGoogle Analytics (GA4، عبر
+    // GoogleAnalytics من @next/third-parties) — بدونهما CSP يمنع تحميل gtag.js نفسه وأي
+    // طلب إرسال بيانات له، ويفشل التتبع بصمت دون أي رسالة خطأ واضحة للمستخدم.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
