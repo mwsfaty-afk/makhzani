@@ -42,7 +42,7 @@ export function DashboardPreview() {
         <span className="size-2.5 rounded-full bg-chart-2/50" />
         <span className="size-2.5 rounded-full bg-chart-3/50" />
         <span className="ms-3 rounded-md bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
-          app.makhzani.com/dashboard
+          mkhzny.com/dashboard
         </span>
       </div>
 

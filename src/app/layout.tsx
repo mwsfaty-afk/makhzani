@@ -21,10 +21,10 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
   title: {
-    default: "مخزني — نظام إدارة المخزون والمبيعات والمشتريات",
+    default: "مخزني | نظام وبرنامج إدارة المخازن والمبيعات والمشتريات",
     template: "%s | مخزني",
   },
-  description: "منصة عربية لإدارة المخازن والمبيعات والمشتريات والعملاء والموردين من لوحة تحكم واحدة.",
+  description: "برنامج ونظام عربي سحابي لإدارة المخازن والمخزون والمبيعات والمشتريات والعملاء والموردين من لوحة تحكم واحدة.",
   robots: { index: true, follow: true },
 };
 
