@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Upload } from "lucide-react";
 import { requireTenant } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { QuickFormDialog } from "@/components/quick-form-dialog";
 import { DeleteButton } from "@/components/delete-button";
 import { createCustomer, deleteCustomer } from "./actions";
@@ -26,20 +28,26 @@ export default async function CustomersPage() {
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>العملاء ({customers.length})</CardTitle>
-        <QuickFormDialog
-          triggerLabel="عميل جديد"
-          title="إضافة عميل"
-          action={createCustomer}
-          fields={[
-            { type: "text", name: "code", label: "الكود", required: true },
-            { type: "text", name: "name", label: "الاسم", required: true },
-            { type: "tel", name: "phone", label: "الهاتف (اختياري)" },
-            { type: "email", name: "email", label: "البريد الإلكتروني (اختياري)" },
-            { type: "text", name: "taxNumber", label: "الرقم الضريبي (اختياري)" },
-            { type: "number", name: "creditLimit", label: "حد الائتمان (اختياري)" },
-            { type: "number", name: "openingBalance", label: "الرصيد الافتتاحي (اختياري)" },
-          ]}
-        />
+        <div className="flex gap-2">
+          <Button render={<Link href="/dashboard/customers/import" />} size="sm" variant="outline">
+            <Upload />
+            استيراد من CSV
+          </Button>
+          <QuickFormDialog
+            triggerLabel="عميل جديد"
+            title="إضافة عميل"
+            action={createCustomer}
+            fields={[
+              { type: "text", name: "code", label: "الكود", required: true },
+              { type: "text", name: "name", label: "الاسم", required: true },
+              { type: "tel", name: "phone", label: "الهاتف (اختياري)" },
+              { type: "email", name: "email", label: "البريد الإلكتروني (اختياري)" },
+              { type: "text", name: "taxNumber", label: "الرقم الضريبي (اختياري)" },
+              { type: "number", name: "creditLimit", label: "حد الائتمان (اختياري)" },
+              { type: "number", name: "openingBalance", label: "الرصيد الافتتاحي (اختياري)" },
+            ]}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {customers.length === 0 ? (

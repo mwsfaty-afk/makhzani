@@ -7,6 +7,7 @@ import { requireTenant } from "@/lib/auth/session";
 import { checkPermission } from "@/lib/auth/permissions";
 import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
 import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
+import { parseCsv } from "@/lib/csv";
 
 const optionalNumber = z
   .string()
@@ -77,6 +78,116 @@ export async function createItem(formData: FormData) {
 
   revalidatePath("/dashboard/inventory/items");
   redirect("/dashboard/inventory/items");
+}
+
+type ImportRowError = { row: number; message: string };
+type ImportResult = { created: number; errors: ImportRowError[]; stoppedEarly: boolean };
+
+/** يستورد أصنافًا من ملف CSV — يبحث عن الوحدة/المجموعة/العلامة التجارية بالاسم ضمن
+ * الشركة، وينشئها تلقائيًا إن لم تكن موجودة (تقليل حاجز الإدخال لعميل عنده بيانات جاهزة
+ * في إكسل). يتوقف فورًا عند تجاوز حد الخطة (PlanLimitExceededError)، لكن يواصل باقي
+ * الصفوف عند أي خطأ آخر (كود مكرر، صف ناقص) ويجمع الأخطاء لعرضها للمستخدم. */
+export async function importItemsAction(formData: FormData): Promise<{ error: string } | ImportResult> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "items.create");
+  if (denied) return denied;
+  const { db } = ctx;
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "يرجى اختيار ملف CSV" };
+
+  const text = await file.text();
+  const rows = parseCsv(text).slice(1); // تجاهل صف العناوين
+  if (rows.length === 0) return { error: "الملف لا يحتوي على بيانات" };
+
+  const unitCache = new Map<string, number>();
+  const categoryCache = new Map<string, number>();
+  const brandCache = new Map<string, number>();
+
+  async function resolveUnit(nameAr: string): Promise<number> {
+    const key = nameAr.trim().toLowerCase();
+    const cached = unitCache.get(key);
+    if (cached) return cached;
+    const existing = await db.unit.findFirst({ where: { nameAr: { equals: nameAr.trim(), mode: "insensitive" } } });
+    const id = existing ? existing.id : (await db.unit.create({ data: { name: nameAr.trim(), nameAr: nameAr.trim() } as any })).id;
+    unitCache.set(key, id);
+    return id;
+  }
+
+  async function resolveCategory(name: string): Promise<number> {
+    const key = name.trim().toLowerCase();
+    const cached = categoryCache.get(key);
+    if (cached) return cached;
+    const existing = await db.category.findFirst({ where: { name: { equals: name.trim(), mode: "insensitive" } } });
+    const id = existing ? existing.id : (await db.category.create({ data: { name: name.trim() } as any })).id;
+    categoryCache.set(key, id);
+    return id;
+  }
+
+  async function resolveBrand(name: string): Promise<number> {
+    const key = name.trim().toLowerCase();
+    const cached = brandCache.get(key);
+    if (cached) return cached;
+    const existing = await db.brand.findFirst({ where: { name: { equals: name.trim(), mode: "insensitive" } } });
+    const id = existing ? existing.id : (await db.brand.create({ data: { name: name.trim() } as any })).id;
+    brandCache.set(key, id);
+    return id;
+  }
+
+  const errors: ImportRowError[] = [];
+  let created = 0;
+  let stoppedEarly = false;
+
+  for (let i = 0; i < rows.length; i++) {
+    const rowNumber = i + 2; // +1 للفهرسة من 1 و+1 لصف العناوين
+    const [code, nameAr, name, unitName, categoryName, brandName, purchasePriceRaw, salePriceRaw] = rows[i].map((c) => c.trim());
+
+    if (!code) {
+      errors.push({ row: rowNumber, message: "الكود مطلوب" });
+      continue;
+    }
+    if (!nameAr && !name) {
+      errors.push({ row: rowNumber, message: "اسم الصنف مطلوب" });
+      continue;
+    }
+    if (!unitName) {
+      errors.push({ row: rowNumber, message: "الوحدة مطلوبة" });
+      continue;
+    }
+
+    try {
+      const baseUnitId = await resolveUnit(unitName);
+      const categoryId = categoryName ? await resolveCategory(categoryName) : undefined;
+      const brandId = brandName ? await resolveBrand(brandName) : undefined;
+      const purchasePrice = purchasePriceRaw && !Number.isNaN(Number(purchasePriceRaw)) ? Number(purchasePriceRaw) : 0;
+      const salePrice = salePriceRaw && !Number.isNaN(Number(salePriceRaw)) ? Number(salePriceRaw) : 0;
+
+      await db.item.create({
+        data: {
+          code,
+          name: name || nameAr,
+          nameAr: nameAr || name,
+          baseUnitId,
+          categoryId,
+          brandId,
+          purchasePrice,
+          salePrice,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      });
+      created++;
+    } catch (err) {
+      if (err instanceof SubscriptionExpiredError || err instanceof PlanLimitExceededError) {
+        errors.push({ row: rowNumber, message: err.message });
+        stoppedEarly = true;
+        break;
+      }
+      errors.push({ row: rowNumber, message: `كود الصنف "${code}" مستخدم بالفعل أو بيانات غير صالحة` });
+    }
+  }
+
+  if (created > 0) revalidatePath("/dashboard/inventory/items");
+  return { created, errors, stoppedEarly };
 }
 
 export async function deleteItem(id: number) {

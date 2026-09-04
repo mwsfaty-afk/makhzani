@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { DeleteButton } from "@/components/delete-button";
 import { deleteItem } from "./actions";
 
@@ -19,10 +19,16 @@ export default async function ItemsPage() {
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>الأصناف ({items.length})</CardTitle>
-        <Button render={<Link href="/dashboard/inventory/items/new" />} size="sm">
-          <Plus />
-          صنف جديد
-        </Button>
+        <div className="flex gap-2">
+          <Button render={<Link href="/dashboard/inventory/items/import" />} size="sm" variant="outline">
+            <Upload />
+            استيراد من CSV
+          </Button>
+          <Button render={<Link href="/dashboard/inventory/items/new" />} size="sm">
+            <Plus />
+            صنف جديد
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {items.length === 0 ? (

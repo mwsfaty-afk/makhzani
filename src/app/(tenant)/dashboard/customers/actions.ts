@@ -8,6 +8,7 @@ import { toUserErrorMessage } from "@/lib/errors";
 import { collectFromCustomer } from "@/lib/services/customers/collectFromCustomer";
 import { SubscriptionExpiredError } from "@/lib/services/billing/subscriptionGuard";
 import { PlanLimitExceededError } from "@/lib/services/billing/enforceLimit";
+import { parseCsv } from "@/lib/csv";
 
 const schema = z.object({
   code: z.string().min(1, "كود العميل مطلوب"),
@@ -36,6 +37,72 @@ export async function createCustomer(formData: FormData) {
   }
   revalidatePath("/dashboard/customers");
   return { success: true };
+}
+
+type ImportRowError = { row: number; message: string };
+type ImportResult = { created: number; errors: ImportRowError[]; stoppedEarly: boolean };
+
+/** يستورد عملاء من ملف CSV — يتوقف فورًا عند تجاوز حد الخطة، ويواصل باقي الصفوف عند أي
+ * خطأ آخر (كود مكرر، صف ناقص) مع تجميع الأخطاء لعرضها للمستخدم. */
+export async function importCustomersAction(formData: FormData): Promise<{ error: string } | ImportResult> {
+  const ctx = await requireTenant();
+  const denied = await checkPermission(ctx, "customers.create");
+  if (denied) return denied;
+  const { db } = ctx;
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "يرجى اختيار ملف CSV" };
+
+  const text = await file.text();
+  const rows = parseCsv(text).slice(1); // تجاهل صف العناوين
+  if (rows.length === 0) return { error: "الملف لا يحتوي على بيانات" };
+
+  const errors: ImportRowError[] = [];
+  let created = 0;
+  let stoppedEarly = false;
+
+  for (let i = 0; i < rows.length; i++) {
+    const rowNumber = i + 2;
+    const [code, name, phone, email, taxNumber, creditLimitRaw, openingBalanceRaw] = rows[i].map((c) => c.trim());
+
+    if (!code) {
+      errors.push({ row: rowNumber, message: "الكود مطلوب" });
+      continue;
+    }
+    if (!name) {
+      errors.push({ row: rowNumber, message: "الاسم مطلوب" });
+      continue;
+    }
+
+    const creditLimit = creditLimitRaw && !Number.isNaN(Number(creditLimitRaw)) ? Number(creditLimitRaw) : 0;
+    const openingBalance = openingBalanceRaw && !Number.isNaN(Number(openingBalanceRaw)) ? Number(openingBalanceRaw) : 0;
+
+    try {
+      await db.customer.create({
+        data: {
+          code,
+          name,
+          phone: phone || undefined,
+          email: email || undefined,
+          taxNumber: taxNumber || undefined,
+          creditLimit,
+          openingBalance,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      });
+      created++;
+    } catch (err) {
+      if (err instanceof SubscriptionExpiredError || err instanceof PlanLimitExceededError) {
+        errors.push({ row: rowNumber, message: err.message });
+        stoppedEarly = true;
+        break;
+      }
+      errors.push({ row: rowNumber, message: `كود العميل "${code}" مستخدم بالفعل أو بيانات غير صالحة` });
+    }
+  }
+
+  if (created > 0) revalidatePath("/dashboard/customers");
+  return { created, errors, stoppedEarly };
 }
 
 export async function collectFromCustomerAction(customerId: number, formData: FormData) {
