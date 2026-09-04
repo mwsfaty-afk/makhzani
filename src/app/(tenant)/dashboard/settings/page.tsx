@@ -63,7 +63,11 @@ export default async function SettingsPage() {
           <CardTitle className="text-base">الوحدات المفعّلة</CardTitle>
         </CardHeader>
         <CardContent>
-          <ModuleSettingsForm initialSales={company.salesEnabled} initialPurchases={company.purchasesEnabled} />
+          <ModuleSettingsForm
+            initialSales={company.salesEnabled}
+            initialPurchases={company.purchasesEnabled}
+            initialExpiryTracking={company.expiryTrackingEnabled}
+          />
         </CardContent>
       </Card>
 

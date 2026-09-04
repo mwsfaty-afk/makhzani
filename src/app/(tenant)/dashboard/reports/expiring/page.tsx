@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Download } from "lucide-react";
 import { requireTenant } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
@@ -14,6 +15,9 @@ export default async function ExpiringReportPage({
   searchParams: Promise<{ days?: string }>;
 }) {
   const { companyId } = await requireTenant();
+  const company = await prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { expiryTrackingEnabled: true } });
+  if (!company.expiryTrackingEnabled) redirect("/dashboard/reports");
+
   const { days: daysParam } = await searchParams;
   const days = DAY_OPTIONS.includes(Number(daysParam) as never) ? Number(daysParam) : 60;
 

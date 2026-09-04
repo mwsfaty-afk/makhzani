@@ -6,6 +6,9 @@ const DAY_OPTIONS = [30, 60, 90] as const;
 
 export async function GET(request: Request) {
   const { companyId } = await requireTenant();
+  const company = await prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { expiryTrackingEnabled: true } });
+  if (!company.expiryTrackingEnabled) return new Response(null, { status: 404 });
+
   const { searchParams } = new URL(request.url);
   const daysParam = searchParams.get("days");
   const days = DAY_OPTIONS.includes(Number(daysParam) as never) ? Number(daysParam) : 60;

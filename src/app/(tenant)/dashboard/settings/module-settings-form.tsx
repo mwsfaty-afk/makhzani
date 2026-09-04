@@ -10,12 +10,15 @@ import { updateModuleSettingsAction } from "./actions";
 export function ModuleSettingsForm({
   initialSales,
   initialPurchases,
+  initialExpiryTracking,
 }: {
   initialSales: boolean;
   initialPurchases: boolean;
+  initialExpiryTracking: boolean;
 }) {
   const [sales, setSales] = useState(initialSales);
   const [purchases, setPurchases] = useState(initialPurchases);
+  const [expiryTracking, setExpiryTracking] = useState(initialExpiryTracking);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +26,7 @@ export function ModuleSettingsForm({
     setError(null);
     formData.set("salesEnabled", sales ? "on" : "off");
     formData.set("purchasesEnabled", purchases ? "on" : "off");
+    formData.set("expiryTrackingEnabled", expiryTracking ? "on" : "off");
     startTransition(async () => {
       const res = await updateModuleSettingsAction(formData);
       if (res && "error" in res) {
@@ -53,6 +57,17 @@ export function ModuleSettingsForm({
           </p>
         </div>
         <Switch id="purchasesEnabled" checked={purchases} onCheckedChange={setPurchases} />
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <Label htmlFor="expiryTrackingEnabled">تتبع تاريخ الصلاحية</Label>
+          <p className="text-xs text-muted-foreground">
+            يظهر حقل تاريخ الصلاحية عند التوريد، وتقرير الأصناف قرب الانتهاء، وتنبيهات قربها — مفيد للأصناف
+            القابلة للتلف (غذائية، أدوية...). مناسب لو نشاطك لا يحتاجه أن يبقى معطَّلًا.
+          </p>
+        </div>
+        <Switch id="expiryTrackingEnabled" checked={expiryTracking} onCheckedChange={setExpiryTracking} />
       </div>
 
       {error && <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}

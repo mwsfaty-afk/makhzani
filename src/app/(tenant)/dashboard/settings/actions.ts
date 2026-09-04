@@ -37,11 +37,12 @@ export async function updateModuleSettingsAction(formData: FormData) {
 
   const salesEnabled = formData.get("salesEnabled") === "on";
   const purchasesEnabled = formData.get("purchasesEnabled") === "on";
+  const expiryTrackingEnabled = formData.get("expiryTrackingEnabled") === "on";
 
   try {
     await prisma.company.update({
       where: { id: ctx.companyId },
-      data: { salesEnabled, purchasesEnabled },
+      data: { salesEnabled, purchasesEnabled, expiryTrackingEnabled },
     });
   } catch (err) {
     return { error: toUserErrorMessage(err, "تعذّر حفظ إعدادات الوحدات") };
@@ -49,5 +50,6 @@ export async function updateModuleSettingsAction(formData: FormData) {
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard", "layout");
+  revalidatePath("/dashboard/reports");
   return { success: true };
 }

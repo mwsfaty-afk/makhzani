@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { TrendingUp, Package, AlertTriangle, ShoppingCart, Truck, PackageX, Zap, CalendarClock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { requireTenant } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/prisma";
 
 const reports = [
   {
@@ -38,6 +40,7 @@ const reports = [
     icon: CalendarClock,
     title: "أصناف قرب انتهاء الصلاحية",
     description: "تنبيه تقديري بناءً على تواريخ الصلاحية المسجَّلة عند التوريد",
+    module: "expiryTracking" as const,
   },
   {
     href: "/dashboard/reports/sales",
@@ -53,12 +56,17 @@ const reports = [
   },
 ];
 
-export default function ReportsIndexPage() {
+export default async function ReportsIndexPage() {
+  const { companyId } = await requireTenant();
+  const company = await prisma.company.findUniqueOrThrow({ where: { id: companyId }, select: { expiryTrackingEnabled: true } });
+
+  const visibleReports = reports.filter((r) => r.module !== "expiryTracking" || company.expiryTrackingEnabled);
+
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">التقارير</h1>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {reports.map((r) => (
+        {visibleReports.map((r) => (
           <Link key={r.href} href={r.href}>
             <Card className="transition-colors hover:border-primary">
               <CardContent className="flex items-center gap-3 py-5">
