@@ -109,6 +109,7 @@ export async function importItemsAction(formData: FormData): Promise<{ error: st
     const cached = unitCache.get(key);
     if (cached) return cached;
     const existing = await db.unit.findFirst({ where: { nameAr: { equals: nameAr.trim(), mode: "insensitive" } } });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- companyId يُحقَن تلقائيًا داخل tenantPrisma()، انظر createItem أعلاه
     const id = existing ? existing.id : (await db.unit.create({ data: { name: nameAr.trim(), nameAr: nameAr.trim() } as any })).id;
     unitCache.set(key, id);
     return id;
@@ -119,6 +120,7 @@ export async function importItemsAction(formData: FormData): Promise<{ error: st
     const cached = categoryCache.get(key);
     if (cached) return cached;
     const existing = await db.category.findFirst({ where: { name: { equals: name.trim(), mode: "insensitive" } } });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- companyId يُحقَن تلقائيًا داخل tenantPrisma()، انظر createItem أعلاه
     const id = existing ? existing.id : (await db.category.create({ data: { name: name.trim() } as any })).id;
     categoryCache.set(key, id);
     return id;
@@ -129,6 +131,7 @@ export async function importItemsAction(formData: FormData): Promise<{ error: st
     const cached = brandCache.get(key);
     if (cached) return cached;
     const existing = await db.brand.findFirst({ where: { name: { equals: name.trim(), mode: "insensitive" } } });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- companyId يُحقَن تلقائيًا داخل tenantPrisma()، انظر createItem أعلاه
     const id = existing ? existing.id : (await db.brand.create({ data: { name: name.trim() } as any })).id;
     brandCache.set(key, id);
     return id;
